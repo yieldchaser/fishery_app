@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgis/postgis:15-3.4
+    container_name: fishing-god-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER:-fishinggod}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-aquaculture2024}
+      POSTGRES_DB: ${DB_NAME:-fishing_god}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/migrations:/docker-entrypoint-initdb.d
+    networks:
+      - fishing-god-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-fishinggod} -d ${DB_NAME:-fishing_god}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fishing-god-backend
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-fishinggod}
+      DB_PASSWORD: ${DB_PASSWORD:-aquaculture2024}
+      DB_NAME: ${DB_NAME:-fishing_god}
+      JWT_SECRET: ${JWT_SECRET:-fishing-god-secret-key}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - fishing-god-network
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  redis:
+    image: redis:7-alpine
+    container_name: fishing-god-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - fishing-god-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.worker
+    container_name: fishing-god-worker
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-fishinggod}
+      DB_PASSWORD: ${DB_PASSWORD:-aquaculture2024}
+      DB_NAME: ${DB_NAME:-fishing_god}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - fishing-god-network
+
+volumes:
+  postgres_data:
+
+networks:
+  fishing-god-network:
+    driver: bridge
