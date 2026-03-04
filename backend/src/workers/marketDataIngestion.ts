@@ -30,11 +30,11 @@ export class MarketDataIngestionWorker {
 
   start(): void {
     logger.info('Starting Market Data Ingestion Worker');
-    
+
     cron.schedule('0 */6 * * *', () => {
       this.ingestMarketData();
     });
-    
+
     this.ingestMarketData();
   }
 
@@ -51,7 +51,7 @@ export class MarketDataIngestionWorker {
       await this.ingestFromNFDB();
       await this.ingestFromAGMARKNET();
       await this.ingestSimulatedData();
-      
+
       logger.info('Market data ingestion completed successfully');
     } catch (error) {
       logger.error('Market data ingestion failed', { error: (error as Error).message });
@@ -70,7 +70,7 @@ export class MarketDataIngestionWorker {
 
   private async ingestSimulatedData(): Promise<void> {
     logger.info('Generating simulated market data');
-    
+
     const simulatedPrices: MarketPriceEntry[] = [
       { speciesName: 'Rohu', marketName: 'Kolkata', stateCode: 'WB', priceInrPerKg: 145, grade: 'A', date: new Date(), source: 'MANUAL_ENTRY', volumeKg: 500 },
       { speciesName: 'Rohu', marketName: 'Hyderabad', stateCode: 'TG', priceInrPerKg: 150, grade: 'A', date: new Date(), source: 'MANUAL_ENTRY', volumeKg: 750 },
@@ -92,9 +92,9 @@ export class MarketDataIngestionWorker {
       try {
         await this.insertMarketPrice(price);
       } catch (error) {
-        logger.error('Failed to insert price', { 
-          species: price.speciesName, 
-          error: (error as Error).message 
+        logger.error('Failed to insert price', {
+          species: price.speciesName,
+          error: (error as Error).message
         });
       }
     }
@@ -111,12 +111,12 @@ export class MarketDataIngestionWorker {
       AND grade = $4
     `, [entry.speciesName, entry.marketName, entry.date.toISOString().split('T')[0], entry.grade]);
 
-    if (existing.rowCount && existing.rowCount > 0) {
+    if (existing.rowCount && existing.rowCount > 0 && Array.isArray(existing.rows) && existing.rows.length > 0) {
       await query(`
         UPDATE market_prices
         SET price_inr_per_kg = $1, volume_kg = $2, source = $3
         WHERE id = $4
-      `, [entry.priceInrPerKg, entry.volumeKg, entry.source, existing.rows[0].id]);
+      `, [entry.priceInrPerKg, entry.volumeKg, entry.source, (existing.rows[0] as any).id]);
     } else {
       await query(`
         INSERT INTO market_prices 
@@ -139,7 +139,7 @@ export class MarketDataIngestionWorker {
 if (require.main === module) {
   const worker = new MarketDataIngestionWorker();
   worker.start();
-  
+
   process.on('SIGTERM', () => {
     logger.info('Worker shutting down');
     process.exit(0);

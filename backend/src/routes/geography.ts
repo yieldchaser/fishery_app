@@ -27,7 +27,7 @@ const suitabilitySchema = z.object({
 router.post('/suitability', async (req, res, next) => {
   try {
     const validated = suitabilitySchema.parse(req.body);
-    
+
     // Validate coordinates are within India
     if (!GeoSuitabilityService.validateCoordinates(validated.latitude, validated.longitude)) {
       return res.status(400).json({
@@ -56,8 +56,8 @@ router.post('/suitability', async (req, res, next) => {
       success: true,
       data: result
     });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
+  } catch (error: any) {
+    if (error.errors) {
       res.status(400).json({
         success: false,
         error: 'Validation Error',
@@ -80,7 +80,7 @@ router.get('/zones', async (req, res, next) => {
       SELECT * FROM geographic_zones
       ORDER BY state_code, zone_name
     `);
-    
+
     res.json({
       success: true,
       data: result.rows
@@ -98,13 +98,13 @@ router.get('/zones/:stateCode', async (req, res, next) => {
   try {
     const { stateCode } = req.params;
     const { query } = await import('../db');
-    
+
     const result = await query(`
       SELECT * FROM geographic_zones
       WHERE state_code = $1
       ORDER BY zone_name
     `, [stateCode.toUpperCase()]);
-    
+
     res.json({
       success: true,
       data: result.rows

@@ -39,7 +39,7 @@ const subsidySchema = z.object({
 router.post('/simulate', async (req, res, next) => {
   try {
     const validated = simulationSchema.parse(req.body);
-    
+
     logger.info('Economics simulation request', {
       landSize: validated.landSizeHectares,
       category: validated.farmerCategory
@@ -60,8 +60,8 @@ router.post('/simulate', async (req, res, next) => {
       success: true,
       data: result
     });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
+  } catch (error: any) {
+    if (error.errors) {
       res.status(400).json({
         success: false,
         error: 'Validation Error',
@@ -80,7 +80,7 @@ router.post('/simulate', async (req, res, next) => {
 router.post('/subsidy', async (req, res, next) => {
   try {
     const validated = subsidySchema.parse(req.body);
-    
+
     logger.info('Subsidy calculation request', {
       category: validated.beneficiaryCategory,
       projectType: validated.projectType
@@ -97,8 +97,8 @@ router.post('/subsidy', async (req, res, next) => {
       success: true,
       data: result
     });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
+  } catch (error: any) {
+    if (error.errors) {
       res.status(400).json({
         success: false,
         error: 'Validation Error',
@@ -122,7 +122,7 @@ router.get('/equipment', async (req, res, next) => {
       WHERE is_active = true
       ORDER BY category, name
     `);
-    
+
     res.json({
       success: true,
       data: result.rows

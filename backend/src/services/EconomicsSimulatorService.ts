@@ -47,58 +47,58 @@ export class EconomicsSimulatorService {
    * Calculates complete economics model based on input parameters
    */
   static async simulate(input: EconomicsSimulatorInput): Promise<EconomicsSimulatorOutput> {
-    logger.info('Starting economics simulation', { 
+    logger.info('Starting economics simulation', {
       landSize: input.landSizeHectares,
-      salinity: input.waterSourceSalinityUsCm 
+      salinity: input.waterSourceSalinityUsCm
     });
 
     const recommendationId = uuidv4();
-    
+
     // Step 1: Determine water classification
     const waterType = this.classifyWater(input.waterSourceSalinityUsCm);
-    
+
     // Step 2: Filter eligible species based on salinity
     const eligibleSpecies = await this.getEligibleSpecies(waterType, input.preferredSpecies);
-    
+
     // Step 3: Determine optimal cultivation system
     const recommendedSystem = this.determineOptimalSystem(
-      waterType, 
+      waterType,
       input.riskTolerance,
       input.availableCapitalInr
     );
-    
+
     // Step 4: Get economic model for recommended system
     const economicModel = await this.getEconomicModel(recommendedSystem);
-    
+
     // Step 5: Calculate CAPEX with equipment costs
     const totalCapex = this.calculateTotalCapex(
       economicModel,
       input.landSizeHectares,
       recommendedSystem
     );
-    
+
     // Step 6: Apply PMMSY subsidy
     const { effectiveCapex, subsidyAmount } = PMMSYSubsidyService.calculateEffectiveCapex(
       totalCapex,
       input.farmerCategory,
       this.mapSystemToProjectType(recommendedSystem, waterType)
     );
-    
+
     // Step 7: Calculate OPEX
     const monthlyOpex = this.calculateMonthlyOpex(economicModel, input.landSizeHectares);
     const totalOpexPerCycle = this.calculateTotalOpex(
-      economicModel, 
+      economicModel,
       input.landSizeHectares,
       economicModel.break_even_months?.max || 12
     );
-    
+
     // Step 8: Calculate revenue projections
     const { projectedRevenue, expectedYield } = this.calculateRevenue(
       eligibleSpecies,
       economicModel,
       input.landSizeHectares
     );
-    
+
     // Step 9: Calculate financial metrics
     const projectedNetProfit = projectedRevenue - totalOpexPerCycle;
     const benefitCostRatio = projectedRevenue / (effectiveCapex + totalOpexPerCycle);
@@ -106,9 +106,9 @@ export class EconomicsSimulatorService {
       effectiveCapex,
       monthlyOpex,
       projectedRevenue,
-      economicModel.culture_period_months?.max || 12
+      (economicModel as any).culture_period_months?.max || 12
     );
-    
+
     // Step 10: Generate species recommendations with scores
     const speciesRecommendations = this.generateSpeciesRecommendations(
       eligibleSpecies,
@@ -116,7 +116,7 @@ export class EconomicsSimulatorService {
       economicModel,
       expectedYield
     );
-    
+
     // Step 11: Build risk analysis profile
     const riskProfile = this.buildRiskAnalysis(
       input,
@@ -124,16 +124,16 @@ export class EconomicsSimulatorService {
       recommendedSystem,
       speciesRecommendations
     );
-    
+
     // Step 12: Generate monthly cash flow
     const monthlyCashFlow = this.generateCashFlow(
       effectiveCapex,
       monthlyOpex,
       projectedRevenue,
       breakEvenMonths,
-      economicModel.culture_period_months?.max || 12
+      (economicModel as any).culture_period_months?.max || 12
     );
-    
+
     // Step 13: Perform sensitivity analysis
     const sensitivityAnalysis = this.performSensitivityAnalysis(
       effectiveCapex,
@@ -142,7 +142,7 @@ export class EconomicsSimulatorService {
       monthlyCashFlow,
       breakEvenMonths
     );
-    
+
     return {
       recommendationId,
       recommendedSpecies: speciesRecommendations,
@@ -178,7 +178,7 @@ export class EconomicsSimulatorService {
       SELECT data FROM knowledge_nodes 
       WHERE node_type = 'SPECIES'
     `;
-    
+
     if (waterType === WaterType.BRACKISH || waterType === WaterType.SALINE) {
       queryText += `
         AND (
@@ -188,12 +188,12 @@ export class EconomicsSimulatorService {
         )
       `;
     }
-    
+
     if (preferredSpecies && preferredSpecies.length > 0) {
       const speciesList = preferredSpecies.map(s => `'${s}'`).join(',');
       queryText += ` AND data->>'scientific_name' IN (${speciesList})`;
     }
-    
+
     const result = await query<{ data: SpeciesData }>(queryText);
     return result.rows.map(r => r.data);
   }
@@ -206,23 +206,23 @@ export class EconomicsSimulatorService {
     if (waterType === WaterType.SALINE) {
       return CultivationSystem.BRACKISH_POND;
     }
-    
+
     if (waterType === WaterType.BRACKISH) {
       return CultivationSystem.BRACKISH_POND;
     }
-    
+
     if (availableCapital < 100000) {
       return CultivationSystem.TRADITIONAL_POND;
     }
-    
+
     if (riskTolerance === RiskTolerance.HIGH && availableCapital > 500000) {
       return CultivationSystem.RAS;
     }
-    
+
     if (availableCapital > 200000) {
       return CultivationSystem.BIOFLOC;
     }
-    
+
     return CultivationSystem.TRADITIONAL_POND;
   }
 
@@ -233,11 +233,11 @@ export class EconomicsSimulatorService {
       AND data->>'system_type' = $1
       LIMIT 1
     `, [system]);
-    
+
     if (result.rows.length === 0) {
       throw new Error(`No economic model found for system: ${system}`);
     }
-    
+
     return result.rows[0].data;
   }
 
@@ -248,10 +248,10 @@ export class EconomicsSimulatorService {
   ): number {
     const capex = model.capital_expenditure;
     let total = 0;
-    
+
     total += (capex.land_preparation_inr_per_hectare || 0) * landSizeHectares;
     total += (capex.pond_construction_inr_per_hectare || 0) * landSizeHectares;
-    
+
     if (system === CultivationSystem.BIOFLOC) {
       const tanksNeeded = Math.ceil(landSizeHectares / 0.1);
       total += tanksNeeded * EQUIPMENT_COSTS.BIOFLOC_TARPAULIN_650GSM;
@@ -263,10 +263,10 @@ export class EconomicsSimulatorService {
       total += (EQUIPMENT_COSTS.RAS_PUMP_1HP * 4) * landSizeHectares;
       total += (EQUIPMENT_COSTS.UV_STERILIZER_40W * 2) * landSizeHectares;
     }
-    
+
     total += capex.initial_stocking_cost_inr * landSizeHectares;
     total += total * (capex.contingency_percent / 100);
-    
+
     return total;
   }
 
@@ -297,10 +297,10 @@ export class EconomicsSimulatorService {
   ): number {
     const monthly = this.calculateMonthlyOpex(model, landSizeHectares);
     let total = monthly * months;
-    
+
     total += (model.operational_expenditure.medicine_cost_inr_per_cycle || 0) * landSizeHectares;
     total += total * ((model.operational_expenditure.miscellaneous_percent || 0) / 100);
-    
+
     return total;
   }
 
@@ -310,14 +310,14 @@ export class EconomicsSimulatorService {
     landSizeHectares: number
   ): { projectedRevenue: number; expectedYield: number } {
     const revenue = model.revenue_projections;
-    const avgYield = (revenue.expected_yield_kg_per_hectare.min + 
-                      revenue.expected_yield_kg_per_hectare.max) / 2;
-    const avgPrice = (revenue.market_price_inr_per_kg.min + 
-                      revenue.market_price_inr_per_kg.max) / 2;
-    
+    const avgYield = (revenue.expected_yield_kg_per_hectare.min +
+      revenue.expected_yield_kg_per_hectare.max) / 2;
+    const avgPrice = (revenue.market_price_inr_per_kg.min +
+      revenue.market_price_inr_per_kg.max) / 2;
+
     const totalYield = avgYield * landSizeHectares;
     const totalRevenue = totalYield * avgPrice;
-    
+
     return { projectedRevenue: totalRevenue, expectedYield: totalYield };
   }
 
@@ -329,7 +329,7 @@ export class EconomicsSimulatorService {
   ): number {
     const monthlyNet = (projectedRevenue / cultureMonths) - monthlyOpex;
     if (monthlyNet <= 0) return 999;
-    
+
     const monthsToBreakEven = capex / monthlyNet;
     return Math.ceil(monthsToBreakEven);
   }
@@ -341,25 +341,25 @@ export class EconomicsSimulatorService {
     expectedYield: number
   ): SpeciesRecommendation[] {
     return species.map(s => {
-      const avgFcr = (s.economic_parameters.feed_conversion_ratio.min + 
-                      s.economic_parameters.feed_conversion_ratio.max) / 2;
-      const avgPrice = (s.economic_parameters.market_price_per_kg_inr.min + 
-                        s.economic_parameters.market_price_per_kg_inr.max) / 2;
-      
+      const avgFcr = (s.economic_parameters.feed_conversion_ratio.min +
+        s.economic_parameters.feed_conversion_ratio.max) / 2;
+      const avgPrice = (s.economic_parameters.market_price_per_kg_inr.min +
+        s.economic_parameters.market_price_per_kg_inr.max) / 2;
+
       let score = 70;
-      
+
       if (input.availableCapitalInr > 500000) score += 10;
       else if (input.availableCapitalInr < 100000) score -= 10;
-      
+
       if (input.riskTolerance === RiskTolerance.HIGH && avgFcr < 1.5) score += 10;
       if (input.riskTolerance === RiskTolerance.LOW && avgFcr < 1.5) score += 15;
-      
+
       const yieldScore = Math.min(20, (expectedYield / 1000));
       score += yieldScore;
-      
+
       const speciesYield = expectedYield * (s.economic_parameters.survival_rate_percent.max / 100);
       const speciesRevenue = speciesYield * avgPrice;
-      
+
       return {
         speciesId: s.scientific_name,
         commonName: s.common_names.en,
@@ -384,7 +384,7 @@ export class EconomicsSimulatorService {
   ): RiskAnalysisProfile {
     const riskFactors: RiskFactor[] = [];
     let overallRisk = input.riskTolerance;
-    
+
     if (waterType === WaterType.SALINE) {
       riskFactors.push({
         category: 'Water Quality',
@@ -393,7 +393,7 @@ export class EconomicsSimulatorService {
         description: 'High salinity limits species options'
       });
     }
-    
+
     if (input.availableCapitalInr < 100000) {
       riskFactors.push({
         category: 'Financial',
@@ -402,7 +402,7 @@ export class EconomicsSimulatorService {
         description: 'Limited capital may constrain emergency responses'
       });
     }
-    
+
     if (system === CultivationSystem.RAS) {
       riskFactors.push({
         category: 'Technical',
@@ -412,7 +412,7 @@ export class EconomicsSimulatorService {
       });
       overallRisk = RiskTolerance.HIGH;
     }
-    
+
     if (system === CultivationSystem.BIOFLOC) {
       riskFactors.push({
         category: 'Operational',
@@ -421,7 +421,7 @@ export class EconomicsSimulatorService {
         description: 'Biofloc requires consistent aeration and monitoring'
       });
     }
-    
+
     return {
       overallRisk,
       riskFactors,
@@ -434,27 +434,27 @@ export class EconomicsSimulatorService {
   private static getMitigationStrategies(risks: RiskFactor[]): string[] {
     const strategies: string[] = [];
     const riskCategories = new Set(risks.map(r => r.category));
-    
+
     if (riskCategories.has('Water Quality')) {
       strategies.push('Install water quality monitoring system');
       strategies.push('Maintain emergency water exchange capability');
     }
-    
+
     if (riskCategories.has('Financial')) {
       strategies.push('Apply for PMMSY subsidy to reduce capital burden');
       strategies.push('Consider cooperative farming to share costs');
     }
-    
+
     if (riskCategories.has('Technical')) {
       strategies.push('Arrange backup power supply (generator)');
       strategies.push('Receive training on system management');
     }
-    
+
     if (riskCategories.has('Operational')) {
       strategies.push('Implement daily monitoring protocol');
       strategies.push('Maintain relationship with technical expert');
     }
-    
+
     return strategies;
   }
 
@@ -467,13 +467,13 @@ export class EconomicsSimulatorService {
   ): MonthlyCashFlow[] {
     const cashFlow: MonthlyCashFlow[] = [];
     let cumulativeCashFlow = -capex;
-    
+
     for (let month = 1; month <= cultureMonths; month++) {
       const revenue = month === cultureMonths ? projectedRevenue : 0;
       const expenses = month === 1 ? 0 : monthlyOpex;
       const netCashFlow = revenue - expenses;
       cumulativeCashFlow += netCashFlow;
-      
+
       cashFlow.push({
         month,
         revenue: Math.round(revenue),
@@ -482,7 +482,7 @@ export class EconomicsSimulatorService {
         cumulativeCashFlow: Math.round(cumulativeCashFlow)
       });
     }
-    
+
     return cashFlow;
   }
 
@@ -495,7 +495,7 @@ export class EconomicsSimulatorService {
   ): SensitivityAnalysis {
     const baseProfit = revenue - capex - opex;
     const baseBcRatio = revenue / (capex + opex);
-    
+
     return {
       bestCase: {
         netProfit: Math.round(baseProfit * 1.25),

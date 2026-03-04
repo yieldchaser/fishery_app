@@ -20,7 +20,7 @@ const syncSchema = z.object({
     table: z.string(),
     recordId: z.string(),
     operation: z.enum(['INSERT', 'UPDATE', 'DELETE']),
-    data: z.record(z.unknown()),
+    data: z.record(z.string(), z.any()),
     timestamp: z.string().datetime()
   }))
 });
@@ -32,7 +32,7 @@ const syncSchema = z.object({
 router.post('/', async (req, res, next) => {
   try {
     const validated = syncSchema.parse(req.body);
-    
+
     logger.info('Sync request received', {
       deviceId: validated.deviceId,
       userId: validated.userId,
@@ -41,7 +41,7 @@ router.post('/', async (req, res, next) => {
 
     // Process incoming changes
     const conflicts: any[] = [];
-    
+
     for (const change of validated.changes) {
       try {
         await processChange(change, validated.userId);
@@ -74,8 +74,8 @@ router.post('/', async (req, res, next) => {
       success: true,
       data: response
     });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
+  } catch (error: any) {
+    if (error.errors) {
       res.status(400).json({
         success: false,
         error: 'Validation Error',
@@ -94,7 +94,7 @@ router.post('/', async (req, res, next) => {
 router.get('/changes', async (req, res, next) => {
   try {
     const { userId, since } = req.query;
-    
+
     if (!userId || !since) {
       return res.status(400).json({
         success: false,
@@ -121,7 +121,7 @@ router.get('/changes', async (req, res, next) => {
 
 async function processChange(change: any, userId: string): Promise<void> {
   const client = await (await import('../db')).pool.connect();
-  
+
   try {
     await client.query('BEGIN');
 
@@ -133,7 +133,7 @@ async function processChange(change: any, userId: string): Promise<void> {
     if (existing.rowCount && existing.rowCount > 0) {
       const serverTimestamp = new Date(existing.rows[0].updated_at);
       const clientTimestamp = new Date(change.timestamp);
-      
+
       if (serverTimestamp > clientTimestamp) {
         throw new Error('Conflict: Server version is newer');
       }
@@ -149,7 +149,7 @@ async function processChange(change: any, userId: string): Promise<void> {
             updated_at = NOW()
         `, [change.recordId, userId, JSON.stringify(change.data)]);
         break;
-        
+
       case 'UPDATE':
         await client.query(`
           UPDATE ${change.table}
@@ -157,7 +157,7 @@ async function processChange(change: any, userId: string): Promise<void> {
           WHERE id = $2 AND user_id = $3
         `, [JSON.stringify(change.data), change.recordId, userId]);
         break;
-        
+
       case 'DELETE':
         await client.query(`
           DELETE FROM ${change.table}
@@ -177,13 +177,13 @@ async function processChange(change: any, userId: string): Promise<void> {
 
 async function getServerChanges(userId: string, since: Date): Promise<SyncChange[]> {
   const changes: SyncChange[] = [];
-  
+
   const knowledgeResult = await query(`
     SELECT id, node_type, data, updated_at
     FROM knowledge_nodes
     WHERE updated_at > $1
   `, [since]);
-  
+
   for (const row of knowledgeResult.rows) {
     changes.push({
       table: 'knowledge_nodes',
@@ -199,7 +199,7 @@ async function getServerChanges(userId: string, since: Date): Promise<SyncChange
     FROM ponds
     WHERE user_id = $1 AND updated_at > $2
   `, [userId, since]);
-  
+
   for (const row of pondResult.rows) {
     changes.push({
       table: 'ponds',

@@ -3,7 +3,7 @@
  * PostgreSQL with JSONB support for hierarchical knowledge graph
  */
 
-import { Pool, PoolConfig, QueryResult } from 'pg';
+import pg, { Pool, PoolConfig, QueryResult } from 'pg';
 import { logger } from '../utils/logger';
 
 // Database configuration
@@ -42,7 +42,7 @@ pool.on('error', (err, client) => {
 /**
  * Execute a SQL query with parameter binding
  */
-export async function query<T = unknown>(
+export async function query<T extends pg.QueryResultRow = any>(
   text: string,
   params?: unknown[]
 ): Promise<QueryResult<T>> {
@@ -50,16 +50,16 @@ export async function query<T = unknown>(
   try {
     const result = await pool.query<T>(text, params);
     const duration = Date.now() - start;
-    logger.debug('Query executed', { 
-      duration: `${duration}ms`, 
+    logger.debug('Query executed', {
+      duration: `${duration}ms`,
       rows: result.rowCount,
-      query: text.slice(0, 100) 
+      query: text.slice(0, 100)
     });
     return result;
   } catch (error) {
-    logger.error('Query execution failed', { 
-      error: (error as Error).message, 
-      query: text.slice(0, 100) 
+    logger.error('Query execution failed', {
+      error: (error as Error).message,
+      query: text.slice(0, 100)
     });
     throw error;
   }
@@ -105,7 +105,7 @@ export function buildJsonbQuery(
 ): { clause: string; params: unknown[] } {
   const jsonbPath = path.map((p, i) => i === 0 ? p : `'${p}'`).join('->');
   const clause = `${column} ${operator === '@>' ? '@>' : `->${path.length > 1 ? '>' : ''}`} $1`;
-  
+
   if (operator === '@>') {
     const searchObject = path.reduceRight<Record<string, unknown>>(
       (acc, key) => ({ [key]: acc }),
@@ -113,7 +113,7 @@ export function buildJsonbQuery(
     );
     return { clause: `${column} @> $1::jsonb`, params: [JSON.stringify(searchObject)] };
   }
-  
+
   return { clause: `(${column}${'->'.repeat(path.length - 1)}->>'${path[path.length - 1]}')::numeric ${operator} $1`, params: [value] };
 }
 
@@ -145,14 +145,14 @@ export function buildTreeQuery(nodeId: string): { sql: string; params: unknown[]
  */
 export async function checkConnection(): Promise<boolean> {
   try {
-    const result = await query('SELECT NOW() as current_time');
-    logger.info('Database connection verified', { 
-      currentTime: result.rows[0]?.current_time 
+    const result = await query<{ current_time: Date }>('SELECT NOW() as current_time');
+    logger.info('Database connection verified', {
+      currentTime: result.rows[0]?.current_time
     });
     return true;
   } catch (error) {
-    logger.error('Database connection failed', { 
-      error: (error as Error).message 
+    logger.error('Database connection failed', {
+      error: (error as Error).message
     });
     return false;
   }

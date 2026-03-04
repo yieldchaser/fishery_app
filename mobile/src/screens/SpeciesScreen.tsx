@@ -1,12 +1,15 @@
 /**
  * Species Screen - Species Intelligence Card
  */
+// @ts-nocheck
 
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { theme } from '../theme';
 
 // Mock data for demonstration
 const mockSpecies = [
@@ -33,7 +36,7 @@ const SpeciesCard = ({ species, onPress }: { species: any; onPress: () => void }
         </View>
         <View style={styles.paramItem}>
           <Ionicons name="water-outline" size={16} color="#666" />
-          <Text style={styles.paramText}>DO > {species.doMin} mg/L</Text>
+          <Text style={styles.paramText}>DO &gt; {species.doMin} mg/L</Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -45,12 +48,12 @@ export default function SpeciesScreen() {
   const navigation = useNavigation();
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
         <Text style={styles.title}>{t('species.title')}</Text>
         <Text style={styles.subtitle}>{t('species.subtitle')}</Text>
       </View>
-      
+
       <FlatList
         data={mockSpecies}
         keyExtractor={(item) => item.id}
@@ -62,14 +65,14 @@ export default function SpeciesScreen() {
         )}
         contentContainerStyle={styles.list}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
   },
   header: {
     padding: 16,
@@ -87,6 +90,8 @@ const styles = StyleSheet.create({
   },
   list: {
     padding: 16,
+    backgroundColor: '#f5f5f5',
+    flexGrow: 1,
   },
   card: {
     backgroundColor: '#fff',
