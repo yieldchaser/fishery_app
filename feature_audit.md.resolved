@@ -13,6 +13,7 @@ Features that are end-to-end integrated with the backend and ready for use.
 | **Species Intelligence**| Dynamic knowledge base for biological and economic parameters. | Fully integrated with live data. |
 | **Water Quality Logs** | Recording and history of water quality measurements. | Integrated with backend persistence. |
 | **Equipment Catalog** | Search and filter aquaculture equipment with CAPEX data. | Grid layout implemented and integrated. |
+| **Feed Catalog**      | Browse different feed types (Floating, Sinking, Organic) with prices. | Dedicated screen and database table implemented. |
 | **Location Services** | Real-time GPS location acquisition and reverse geocoding. | Fully functional using OSM Nominatim. |
 | **Backend API Core** | Centralized apiService for communication. | Operational and tested. |
 

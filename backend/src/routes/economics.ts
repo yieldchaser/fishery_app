@@ -132,4 +132,26 @@ router.get('/equipment', async (req, res, next) => {
   }
 });
 
+/**
+ * GET /api/v1/economics/feed
+ * Get feed catalog
+ */
+router.get('/feed', async (req, res, next) => {
+  try {
+    const { query } = await import('../db');
+    const result = await query(`
+      SELECT * FROM feed_catalog 
+      WHERE is_active = true
+      ORDER BY cost_per_kg_inr ASC
+    `);
+
+    res.json({
+      success: true,
+      data: result.rows
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 export { router as economicsRouter };

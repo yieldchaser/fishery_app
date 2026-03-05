@@ -57,6 +57,13 @@ export default function HomeScreen() {
       color: theme.colors.primary,
       bgColor: theme.colors.primaryLight,
     },
+    {
+      icon: 'nutrition-outline' as const,
+      title: 'Feed & Nutrition',
+      onPress: () => navigation.navigate('FeedCatalog' as never),
+      color: theme.colors.success,
+      bgColor: '#DCFCE7',
+    },
   ];
 
   return (

@@ -45,6 +45,10 @@ export const economicsService = {
         const response = await api.get('/api/v1/economics/equipment');
         return response.data;
     },
+    getFeed: async () => {
+        const response = await api.get('/api/v1/economics/feed');
+        return response.data;
+    },
 };
 
 export const marketService = {
