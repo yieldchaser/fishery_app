@@ -68,26 +68,63 @@ export default function SpeciesDetailScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>{t('species.economicParameters') || 'Economic Projections'}</Text>
         <View style={styles.paramCard}>
-          <ParamRow
-            icon="nutrition-outline"
-            label={t('species.feedConversionRatio') || 'Avg. FCR'}
-            value={`${econ.feed_conversion_ratio?.min || 1.2} - ${econ.feed_conversion_ratio?.max || 1.8}`}
-          />
-          <ParamRow
-            icon="trending-up-outline"
-            label={t('species.expectedYield') || 'Expected Yield'}
-            value={`${econ.expected_yield_mt_per_acre?.min || 3}-${econ.expected_yield_mt_per_acre?.max || 5} MT/Acre`}
-          />
-          <ParamRow
-            icon="cash-outline"
-            label={t('species.marketPrice') || 'Market Price'}
-            value={`₹${econ.market_price_per_kg_inr?.min || 100}-${econ.market_price_per_kg_inr?.max || 150}/kg`}
-          />
-          <ParamRow
-            icon="time-outline"
-            label={t('species.culturePeriod') || 'Culture Period'}
-            value={`${d.culture_period_months?.min || 8}-${d.culture_period_months?.max || 10} months`}
-          />
+          {d.excel_economics ? (
+            <>
+              <ParamRow
+                icon="cash-outline"
+                label="Benchmark Market Price"
+                value={`₹${d.excel_economics.market_price_inr_kg}/kg`}
+              />
+              <ParamRow
+                icon="time-outline"
+                label="Culture Duration"
+                value={`${d.excel_economics.culture_period_months} months`}
+              />
+              <ParamRow
+                icon="analytics-outline"
+                label="Typical Survival"
+                value={`${d.excel_economics.harvest_survival_percent}%`}
+              />
+              <ParamRow
+                icon="business-outline"
+                label="CAPEX (Infrastructure)"
+                value={`₹${d.excel_economics.capital_investment_lakh_ha} Lakh / Ha`}
+              />
+              <ParamRow
+                icon="receipt-outline"
+                label="OPEX (Per Crop)"
+                value={`₹${d.excel_economics.operational_cost_lakh_ha_crop} Lakh / Ha`}
+              />
+              <ParamRow
+                icon="refresh-outline"
+                label="Crops per Year"
+                value={`${d.excel_economics.crops_per_year}`}
+              />
+            </>
+          ) : (
+            <>
+              <ParamRow
+                icon="nutrition-outline"
+                label={t('species.feedConversionRatio') || 'Avg. FCR'}
+                value={`${econ.feed_conversion_ratio?.min || 1.2} - ${econ.feed_conversion_ratio?.max || 1.8}`}
+              />
+              <ParamRow
+                icon="trending-up-outline"
+                label={t('species.expectedYield') || 'Expected Yield'}
+                value={`${econ.expected_yield_mt_per_acre?.min || 3}-${econ.expected_yield_mt_per_acre?.max || 5} MT/Acre`}
+              />
+              <ParamRow
+                icon="cash-outline"
+                label={t('species.marketPrice') || 'Market Price'}
+                value={`₹${econ.market_price_per_kg_inr?.min || 100}-${econ.market_price_per_kg_inr?.max || 150}/kg`}
+              />
+              <ParamRow
+                icon="time-outline"
+                label={t('species.culturePeriod') || 'Culture Period'}
+                value={`${d.culture_period_months?.min || 8}-${d.culture_period_months?.max || 10} months`}
+              />
+            </>
+          )}
         </View>
       </View>
 
