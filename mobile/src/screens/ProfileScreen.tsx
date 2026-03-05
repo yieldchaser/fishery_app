@@ -4,22 +4,48 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { loadProfile, UserProfile } from './PersonalInfoScreen';
+import { syncService } from '../services/syncService';
 
 export default function ProfileScreen({ navigation }: any) {
   const { t, i18n } = useTranslation();
-  const [profile, setProfile] = useState<UserProfile>({ name: '', phone: '', farmerCategory: 'GENERAL', stateCode: '' });
+  const [profile, setProfile] = useState<UserProfile>({ userId: '', name: '', phone: '', farmerCategory: 'GENERAL', stateCode: '' });
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [lastSynced, setLastSynced] = useState<string | null>(null);
 
-  // Reload profile every time the tab is focused (including return from PersonalInfoScreen)
   useFocusEffect(
     useCallback(() => {
       loadProfile().then(setProfile);
     }, [])
   );
+
+  const handleSync = async () => {
+    if (!profile.userId) {
+      Alert.alert('Profile Incomplete', 'Please save your profile before syncing.');
+      return;
+    }
+    if (isSyncing) return;
+
+    setIsSyncing(true);
+    try {
+      const res = await syncService.sync(profile.userId);
+      if (res.success) {
+        const now = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+        setLastSynced(now);
+        Alert.alert('✓ Sync Complete', `Your data (market prices, species data) is now up to date.`);
+      } else {
+        Alert.alert('Sync Failed', res.error || 'Please check your internet connection.');
+      }
+    } catch (err) {
+      Alert.alert('Sync Error', 'An unexpected error occurred. Please try again.');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   const categoryLabels: Record<string, string> = {
     GENERAL: 'General', WOMEN: 'Women', SC: 'SC', ST: 'ST',
@@ -64,8 +90,9 @@ export default function ProfileScreen({ navigation }: any) {
     {
       icon: 'sync-outline',
       title: t('profile.syncData'),
-      subtitle: 'Sync with server',
-      onPress: () => Alert.alert('Coming Soon', 'Data sync will be available in the next update.'),
+      subtitle: lastSynced ? `Last synced at ${lastSynced}` : 'Sync market prices & species data',
+      onPress: handleSync,
+      isSyncing,
     },
     {
       icon: 'log-out-outline',
@@ -101,18 +128,35 @@ export default function ProfileScreen({ navigation }: any) {
         ) : null}
       </View>
 
+      {/* Sync Status Banner (visible while syncing) */}
+      {isSyncing && (
+        <View style={styles.syncBanner}>
+          <ActivityIndicator size="small" color="#fff" />
+          <Text style={styles.syncBannerText}>Syncing data with server...</Text>
+        </View>
+      )}
+
       {/* Menu */}
       <View style={styles.menu}>
         {menuItems.map((item, index) => (
-          <TouchableOpacity key={index} style={styles.menuItem} onPress={item.onPress} activeOpacity={0.7}>
-            <View style={[styles.iconWrap, item.danger && styles.iconWrapDanger]}>
-              <Ionicons name={item.icon as any} size={20} color={item.danger ? '#F44336' : '#2E7D32'} />
+          <TouchableOpacity
+            key={index}
+            style={styles.menuItem}
+            onPress={item.isSyncing ? undefined : item.onPress}
+            activeOpacity={item.isSyncing ? 1 : 0.7}
+          >
+            <View style={[styles.iconWrap, (item as any).danger && styles.iconWrapDanger]}>
+              {item.isSyncing ? (
+                <ActivityIndicator size="small" color="#2E7D32" />
+              ) : (
+                <Ionicons name={item.icon as any} size={20} color={(item as any).danger ? '#F44336' : '#2E7D32'} />
+              )}
             </View>
             <View style={styles.menuTextBlock}>
-              <Text style={[styles.menuText, item.danger && styles.dangerText]}>{item.title}</Text>
+              <Text style={[styles.menuText, (item as any).danger && styles.dangerText]}>{item.title}</Text>
               {item.subtitle ? <Text style={styles.menuSub}>{item.subtitle}</Text> : null}
             </View>
-            {item.value && <Text style={styles.menuValue}>{item.value}</Text>}
+            {(item as any).value && <Text style={styles.menuValue}>{(item as any).value}</Text>}
             <Ionicons name="chevron-forward" size={18} color="#ccc" />
           </TouchableOpacity>
         ))}
@@ -134,6 +178,12 @@ const styles = StyleSheet.create({
   badge: { backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 16, marginTop: 8 },
   badgeText: { color: '#fff', fontSize: 12, fontWeight: '600' },
   stateLabel: { color: 'rgba(255,255,255,0.7)', fontSize: 12, marginTop: 4 },
+
+  syncBanner: {
+    flexDirection: 'row', alignItems: 'center', backgroundColor: '#388E3C',
+    paddingHorizontal: 16, paddingVertical: 10, gap: 10,
+  },
+  syncBannerText: { color: '#fff', fontSize: 13, fontWeight: '500' },
 
   menu: { marginTop: 16, backgroundColor: '#fff', borderRadius: 12, marginHorizontal: 12, overflow: 'hidden', elevation: 1 },
   menuItem: { flexDirection: 'row', alignItems: 'center', padding: 14, borderBottomWidth: 1, borderBottomColor: '#f5f5f5' },

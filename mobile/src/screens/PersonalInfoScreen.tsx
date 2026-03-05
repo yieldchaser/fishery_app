@@ -16,10 +16,18 @@ import { useTranslation } from 'react-i18next';
 const PROFILE_KEY = '@fishing_god_profile';
 
 export interface UserProfile {
+    userId: string;
     name: string;
     phone: string;
     farmerCategory: 'GENERAL' | 'WOMEN' | 'SC' | 'ST';
     stateCode: string;
+}
+
+function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 }
 
 const FARMER_CATEGORIES: { value: UserProfile['farmerCategory']; label: string }[] = [
@@ -57,9 +65,16 @@ const STATES = [
 export async function loadProfile(): Promise<UserProfile> {
     try {
         const json = await AsyncStorage.getItem(PROFILE_KEY);
-        if (json) return JSON.parse(json) as UserProfile;
+        if (json) {
+            const p = JSON.parse(json) as UserProfile;
+            if (!p.userId) {
+                p.userId = generateUUID();
+                await saveProfile(p);
+            }
+            return p;
+        }
     } catch (_) { }
-    return { name: '', phone: '', farmerCategory: 'GENERAL', stateCode: '' };
+    return { userId: generateUUID(), name: '', phone: '', farmerCategory: 'GENERAL', stateCode: '' };
 }
 
 /** Persist profile */
@@ -73,6 +88,7 @@ interface Props {
 
 export default function PersonalInfoScreen({ navigation }: Props) {
     const { t } = useTranslation();
+    const [userId, setUserId] = useState('');
     const [name, setName] = useState('');
     const [phone, setPhone] = useState('');
     const [farmerCategory, setFarmerCategory] = useState<UserProfile['farmerCategory']>('GENERAL');
@@ -86,6 +102,7 @@ export default function PersonalInfoScreen({ navigation }: Props) {
 
     useEffect(() => {
         loadProfile().then(p => {
+            setUserId(p.userId);
             setName(p.name);
             setPhone(p.phone);
             setFarmerCategory(p.farmerCategory);
@@ -104,7 +121,7 @@ export default function PersonalInfoScreen({ navigation }: Props) {
         }
         setSaving(true);
         try {
-            await saveProfile({ name: name.trim(), phone: phone.trim(), farmerCategory, stateCode });
+            await saveProfile({ userId, name: name.trim(), phone: phone.trim(), farmerCategory, stateCode });
             setDirty(false);
             Alert.alert('✓ Saved', 'Your profile has been updated.', [
                 { text: 'OK', onPress: () => navigation.goBack() },
