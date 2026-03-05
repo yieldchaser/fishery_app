@@ -31,6 +31,7 @@ import WaterQualityScreen from './src/screens/WaterQualityScreen';
 import MarketPricesScreen from './src/screens/MarketPricesScreen';
 import EquipmentCatalogScreen from './src/screens/EquipmentCatalogScreen';
 import FeedCatalogScreen from './src/screens/FeedCatalogScreen';
+import PersonalInfoScreen from './src/screens/PersonalInfoScreen';
 
 // Types
 export type RootStackParamList = {
@@ -41,6 +42,7 @@ export type RootStackParamList = {
   MarketPrices: undefined;
   EquipmentCatalog: undefined;
   FeedCatalog: undefined;
+  PersonalInfo: undefined;
 };
 
 export type MainTabParamList = {
@@ -181,6 +183,11 @@ function App() {
               name="FeedCatalog"
               component={FeedCatalogScreen}
               options={{ title: 'Feed & Nutrition' }}
+            />
+            <Stack.Screen
+              name="PersonalInfo"
+              component={PersonalInfoScreen}
+              options={{ title: 'Personal Information' }}
             />
           </Stack.Navigator>
         </NavigationContainer>
