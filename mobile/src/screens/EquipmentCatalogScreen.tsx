@@ -58,14 +58,22 @@ export default function EquipmentCatalogScreen() {
     const renderItem = ({ item }: { item: any }) => (
         <View style={styles.card}>
             <View style={styles.cardIcon}>
-                <Ionicons
-                    name={item.category === 'AERATION' ? 'options-outline' :
-                        item.category === 'TANK' ? 'cube-outline' :
-                            item.category === 'CIRCULATION' ? 'sync-outline' :
-                                'construct-outline'}
-                    size={32}
-                    color={theme.colors.primary}
-                />
+                {item.image_url ? (
+                    <Image
+                        source={{ uri: item.image_url }}
+                        style={styles.cardImage}
+                        resizeMode="cover"
+                    />
+                ) : (
+                    <Ionicons
+                        name={item.category === 'AERATION' ? 'options-outline' :
+                            item.category === 'TANK' ? 'cube-outline' :
+                                item.category === 'CIRCULATION' ? 'sync-outline' :
+                                    'construct-outline'}
+                        size={32}
+                        color={theme.colors.primary}
+                    />
+                )}
             </View>
             <View style={styles.cardContent}>
                 <Text style={styles.categoryText}>{item.category}</Text>
@@ -155,14 +163,22 @@ export default function EquipmentCatalogScreen() {
                         {selectedItem && (
                             <ScrollView style={styles.modalBody}>
                                 <View style={styles.modalIconWrap}>
-                                    <Ionicons
-                                        name={selectedItem.category === 'AERATION' ? 'options-outline' :
-                                            selectedItem.category === 'TANK' ? 'cube-outline' :
-                                                selectedItem.category === 'CIRCULATION' ? 'sync-outline' :
-                                                    'construct-outline'}
-                                        size={48}
-                                        color={theme.colors.primary}
-                                    />
+                                    {selectedItem.image_url ? (
+                                        <Image
+                                            source={{ uri: selectedItem.image_url }}
+                                            style={styles.modalFullImage}
+                                            resizeMode="contain"
+                                        />
+                                    ) : (
+                                        <Ionicons
+                                            name={selectedItem.category === 'AERATION' ? 'options-outline' :
+                                                selectedItem.category === 'TANK' ? 'cube-outline' :
+                                                    selectedItem.category === 'CIRCULATION' ? 'sync-outline' :
+                                                        'construct-outline'}
+                                            size={48}
+                                            color={theme.colors.primary}
+                                        />
+                                    )}
                                 </View>
 
                                 <Text style={styles.modalItemTitle}>{selectedItem.name}</Text>
@@ -231,7 +247,8 @@ const styles = StyleSheet.create({
     categoryBtnTextActive: { color: '#fff' },
     list: { padding: 12 },
     card: { flex: 1, margin: 6, backgroundColor: '#fff', borderRadius: 12, overflow: 'hidden', elevation: 2, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2 },
-    cardIcon: { height: 100, backgroundColor: '#e9ecef', justifyContent: 'center', alignItems: 'center' },
+    cardIcon: { height: 120, backgroundColor: '#e9ecef', justifyContent: 'center', alignItems: 'center' },
+    cardImage: { width: '100%', height: '100%' },
     cardContent: { padding: 12 },
     categoryText: { fontSize: 10, color: theme.colors.primary, fontWeight: 'bold', marginBottom: 4 },
     nameText: { fontSize: 14, fontWeight: '600', color: '#333', height: 40, marginBottom: 8 },
@@ -250,7 +267,8 @@ const styles = StyleSheet.create({
     modalTitle: { fontSize: 18, fontWeight: 'bold', color: '#333' },
     closeBtn: { padding: 4 },
     modalBody: { padding: 20 },
-    modalIconWrap: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#e9ecef', justifyContent: 'center', alignItems: 'center', alignSelf: 'center', marginBottom: 16 },
+    modalIconWrap: { width: '100%', height: 200, backgroundColor: '#f8f9fa', borderRadius: 16, overflow: 'hidden', justifyContent: 'center', alignItems: 'center', marginBottom: 20 },
+    modalFullImage: { width: '100%', height: '100%' },
     modalItemTitle: { fontSize: 22, fontWeight: 'bold', color: '#111', textAlign: 'center', marginBottom: 8 },
     modalCategoryBadge: { alignSelf: 'center', backgroundColor: theme.colors.surface, color: theme.colors.primary, paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12, fontSize: 12, fontWeight: '600', marginBottom: 24 },
     specsContainer: { backgroundColor: '#f8f9fa', borderRadius: 16, padding: 16, marginBottom: 20 },
