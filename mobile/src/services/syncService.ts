@@ -59,8 +59,8 @@ export const syncService = {
                     }
                 },
 
-                migrationsEnabledAtVersion: 1,
             });
+
 
             return { success: true };
         } catch (error: any) {
