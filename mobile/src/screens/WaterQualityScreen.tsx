@@ -7,9 +7,7 @@ import {
   View, Text, StyleSheet, ScrollView,
   TouchableOpacity, TextInput, Alert,
   ActivityIndicator, RefreshControl,
-  Platform,
 } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { waterQualityService } from '../services/apiService';
@@ -131,12 +129,11 @@ export default function WaterQualityScreen() {
       </View>
 
       {activeTab === 'log' ? (
-        <KeyboardAwareScrollView
+        <ScrollView
           style={styles.content}
-          contentContainerStyle={{ paddingBottom: 40 }}
-          enableOnAndroid={true}
-          extraScrollHeight={20}
+          contentContainerStyle={{ paddingBottom: 320 }}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
           <View style={styles.form}>
             <InputRow label={t('waterQuality.temperature') || 'Temperature (°C)'} icon="thermometer-outline"
@@ -167,7 +164,7 @@ export default function WaterQualityScreen() {
               }
             </TouchableOpacity>
           </View>
-        </KeyboardAwareScrollView>
+        </ScrollView>
       ) : (
         <ScrollView
           style={styles.content}
