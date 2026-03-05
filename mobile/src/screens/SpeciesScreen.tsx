@@ -16,11 +16,18 @@ import { theme } from '../theme';
 import { speciesService } from '../services/apiService';
 
 const SpeciesCard = ({ species, onPress }: { species: any; onPress: () => void }) => {
+  const { t, i18n } = useTranslation();
   const d = species.data || {};
   const params = d.biological_parameters || {};
   const temp = params.temperature_celsius || {};
   const doMin = params.dissolved_oxygen_mg_l?.min ?? params.min_do ?? '-';
-  const commonName = d.common_names?.en || d.scientific_name || 'Unknown Species';
+  const currentLang = i18n.language || 'en';
+  const enName = d.common_names?.en;
+
+  // Try i18n mapping first, then db common_names[lang], then db common_names.en, then scientific
+  const translatedName = enName ? t(`species.names.${enName}`, { defaultValue: '' }) : '';
+  const commonName = translatedName || d.common_names?.[currentLang] || enName || d.scientific_name || 'Unknown Species';
+
   const category = (d.category || '').replace(/_/g, ' ');
 
   return (
@@ -88,16 +95,20 @@ export default function SpeciesScreen() {
 
   useEffect(() => { loadSpecies(); }, [loadSpecies]);
 
+  const currentLang = i18n.language || 'en';
+
   useEffect(() => {
     if (!search) { setFiltered(speciesList); return; }
     const q = search.toLowerCase();
     setFiltered(speciesList.filter((s: any) => {
       const d = s.data || {};
-      const en = (d.common_names?.en || '').toLowerCase();
+      const enName = d.common_names?.en;
+      const translatedName = enName ? t(`species.names.${enName}`, { defaultValue: '' }) : '';
+      const localizedName = (translatedName || d.common_names?.[currentLang] || enName || '').toLowerCase();
       const sci = (d.scientific_name || '').toLowerCase();
-      return en.includes(q) || sci.includes(q);
+      return localizedName.includes(q) || sci.includes(q);
     }));
-  }, [search, speciesList]);
+  }, [search, speciesList, currentLang, t]);
 
   const onRefresh = () => { setRefreshing(true); loadSpecies(); };
 

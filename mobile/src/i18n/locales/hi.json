@@ -47,6 +47,16 @@
     "title": "प्रजाति बुद्धिमत्ता",
     "subtitle": "विभिन्न जलकृषि प्रजातियों के बारे में जानें",
     "searchPlaceholder": "प्रजातियां खोजें...",
+    "names": {
+      "Rohu": "रोहू",
+      "Catla": "कतला",
+      "Mrigal": "मृगल",
+      "Pangasius": "पंगासियस",
+      "Vannamei Shrimp": "वनामी झींगा",
+      "Black Tiger Shrimp": "ब्लैक टाइगर झींगा",
+      "Tilapia": "तिलापिया",
+      "Scampi": "स्कैम्पी"
+    },
     "categories": {
       "INDIAN_MAJOR_CARP": "भारतीय प्रमुख कार्प",
       "PANGASIUS": "पैंगेशियस",

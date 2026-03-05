@@ -10,7 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRoute, useNavigation } from '@react-navigation/native';
 
 export default function SpeciesDetailScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const route = useRoute();
   const navigation = useNavigation();
   const { speciesData } = route.params as any;
@@ -26,7 +26,10 @@ export default function SpeciesDetailScreen() {
   const d = speciesData.data || {};
   const params = d.biological_parameters || {};
   const econ = d.economic_parameters || {};
-  const commonName = d.common_names?.en || d.scientific_name;
+  const currentLang = i18n.language || 'en';
+  const enName = d.common_names?.en;
+  const translatedName = enName ? t(`species.names.${enName}`, { defaultValue: '' }) : '';
+  const commonName = translatedName || d.common_names?.[currentLang] || enName || d.scientific_name;
 
   return (
     <ScrollView style={styles.container}>

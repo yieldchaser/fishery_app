@@ -47,6 +47,16 @@
         "title": "Species Intelligence",
         "subtitle": "Learn about different aquaculture species",
         "searchPlaceholder": "Search species...",
+        "names": {
+            "Rohu": "Rohu",
+            "Catla": "Catla",
+            "Mrigal": "Mrigal",
+            "Pangasius": "Pangasius",
+            "Vannamei Shrimp": "Vannamei Shrimp",
+            "Black Tiger Shrimp": "Black Tiger Shrimp",
+            "Tilapia": "Tilapia",
+            "Scampi": "Scampi"
+        },
         "categories": {
             "INDIAN_MAJOR_CARP": "Indian Major Carp",
             "PANGASIUS": "Pangasius",
