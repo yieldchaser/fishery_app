@@ -58,9 +58,8 @@ export const syncService = {
                         console.warn('[Sync] Server reported conflicts:', conflicts);
                     }
                 },
-
+                sendCreatedAsUpdated: true,
             });
-
 
             return { success: true };
         } catch (error: any) {
