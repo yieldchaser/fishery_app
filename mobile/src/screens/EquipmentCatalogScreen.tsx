@@ -70,7 +70,7 @@ export default function EquipmentCatalogScreen() {
             <View style={styles.cardContent}>
                 <Text style={styles.categoryText}>{item.category}</Text>
                 <Text style={styles.nameText} numberOfLines={2}>{item.name}</Text>
-                <Text style={styles.priceText}>₹{parseFloat(item.cost_inr).toLocaleString('en-IN')}</Text>
+                <Text style={styles.priceText}>Avg. ₹{parseFloat(item.cost_inr).toLocaleString('en-IN')}</Text>
 
                 <View style={styles.specsRow}>
                     <Text style={styles.specLabel}>Lifespan:</Text>
@@ -172,7 +172,7 @@ export default function EquipmentCatalogScreen() {
                                     <Text style={styles.sectionHeading}>Financials & Lifecycle</Text>
                                     <View style={styles.specDetailRow}>
                                         <Text style={styles.specDetailLabel}>Capital Cost</Text>
-                                        <Text style={styles.specDetailValue}>₹{parseFloat(selectedItem.cost_inr).toLocaleString('en-IN')}</Text>
+                                        <Text style={styles.specDetailValue}>Est. Avg. ₹{parseFloat(selectedItem.cost_inr).toLocaleString('en-IN')}</Text>
                                     </View>
                                     {selectedItem.maintenance_cost_annual_inr && (
                                         <View style={styles.specDetailRow}>

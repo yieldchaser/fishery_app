@@ -1,0 +1,10 @@
+UPDATE equipment_catalog SET cost_inr = 18000 WHERE name = '1HP Paddle Wheel Aerator (2-wheel)';
+UPDATE equipment_catalog SET cost_inr = 26000 WHERE name = '2HP Paddle Wheel Aerator (4-wheel)';
+UPDATE equipment_catalog SET cost_inr = 14500 WHERE name = 'Automatic Solar Fish Feeder';
+UPDATE equipment_catalog SET cost_inr = 10500 WHERE name = '2HP Submersible Water Pump';
+UPDATE equipment_catalog SET cost_inr = 45000 WHERE name = '5kVA Silent Diesel Generator';
+UPDATE equipment_catalog SET cost_inr = 14500 WHERE name = 'Handheld Multiparameter Water Meter';
+UPDATE equipment_catalog SET cost_inr = 8500 WHERE name = 'Digital Dissolved Oxygen (DO) Meter';
+UPDATE equipment_catalog SET cost_inr = 8000 WHERE name = 'Pond Seining Net (100m x 3m)';
+UPDATE equipment_catalog SET cost_inr = 1500 WHERE name = 'Cast Net (12ft)';
+UPDATE equipment_catalog SET cost_inr = 600 WHERE name = 'Fingerling Transport Crate (50L)';
