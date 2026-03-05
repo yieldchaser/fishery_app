@@ -10,9 +10,11 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { loadProfile, UserProfile } from './PersonalInfoScreen';
 import { syncService } from '../services/syncService';
+import { useAuth } from '../AuthContext';
 
 export default function ProfileScreen({ navigation }: any) {
   const { t, i18n } = useTranslation();
+  const { logout } = useAuth();
   const [profile, setProfile] = useState<UserProfile>({ userId: '', name: '', phone: '', farmerCategory: 'GENERAL', stateCode: '' });
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSynced, setLastSynced] = useState<string | null>(null);
@@ -100,7 +102,7 @@ export default function ProfileScreen({ navigation }: any) {
       subtitle: 'Sign out of the app',
       onPress: () => Alert.alert('Logout', 'Are you sure you want to log out?', [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Logout', style: 'destructive', onPress: () => { } },
+        { text: 'Logout', style: 'destructive', onPress: () => logout() },
       ]),
       danger: true,
     },

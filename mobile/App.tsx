@@ -133,66 +133,47 @@ function MainTabs() {
   );
 }
 
+import { AuthProvider, useAuth } from './src/AuthContext';
+import AuthScreen from './src/screens/AuthScreen';
+
+function MainApp() {
+  const { isAuthenticated, login } = useAuth();
+
+  if (!isAuthenticated) {
+    return <AuthScreen onLoginSuccess={login} />;
+  }
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator
+        screenOptions={{
+          headerStyle: { backgroundColor: theme.colors.surface },
+          headerTintColor: theme.colors.primary,
+          headerTitleStyle: { fontWeight: 'bold' },
+        }}
+      >
+        <Stack.Screen name="Main" component={MainTabs} options={{ headerShown: false }} />
+        <Stack.Screen name="SpeciesDetail" component={SpeciesDetailScreen} options={{ title: 'Species Details' }} />
+        <Stack.Screen name="EconomicsResult" component={EconomicsResultScreen} options={{ title: 'Simulation Results' }} />
+        <Stack.Screen name="WaterQuality" component={WaterQualityScreen} options={{ title: 'Water Quality Log' }} />
+        <Stack.Screen name="MarketPrices" component={MarketPricesScreen} options={{ title: 'Market Prices' }} />
+        <Stack.Screen name="EquipmentCatalog" component={EquipmentCatalogScreen} options={{ title: 'Equipment Catalog' }} />
+        <Stack.Screen name="FeedCatalog" component={FeedCatalogScreen} options={{ title: 'Feed & Nutrition' }} />
+        <Stack.Screen name="PersonalInfo" component={PersonalInfoScreen} options={{ title: 'Personal Information' }} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
 function App() {
   return (
     <DatabaseProvider database={database}>
-      <SafeAreaProvider>
-        <NavigationContainer>
-          <Stack.Navigator
-            screenOptions={{
-              headerStyle: {
-                backgroundColor: theme.colors.surface,
-              },
-              headerTintColor: theme.colors.primary,
-              headerTitleStyle: {
-                fontWeight: 'bold',
-              },
-            }}
-          >
-            <Stack.Screen
-              name="Main"
-              component={MainTabs}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="SpeciesDetail"
-              component={SpeciesDetailScreen}
-              options={{ title: 'Species Details' }}
-            />
-            <Stack.Screen
-              name="EconomicsResult"
-              component={EconomicsResultScreen}
-              options={{ title: 'Simulation Results' }}
-            />
-            <Stack.Screen
-              name="WaterQuality"
-              component={WaterQualityScreen}
-              options={{ title: 'Water Quality Log' }}
-            />
-            <Stack.Screen
-              name="MarketPrices"
-              component={MarketPricesScreen}
-              options={{ title: 'Market Prices' }}
-            />
-            <Stack.Screen
-              name="EquipmentCatalog"
-              component={EquipmentCatalogScreen}
-              options={{ title: 'Equipment Catalog' }}
-            />
-            <Stack.Screen
-              name="FeedCatalog"
-              component={FeedCatalogScreen}
-              options={{ title: 'Feed & Nutrition' }}
-            />
-            <Stack.Screen
-              name="PersonalInfo"
-              component={PersonalInfoScreen}
-              options={{ title: 'Personal Information' }}
-            />
-          </Stack.Navigator>
-        </NavigationContainer>
-        <StatusBar style="auto" />
-      </SafeAreaProvider>
+      <AuthProvider>
+        <SafeAreaProvider>
+          <MainApp />
+          <StatusBar style="auto" />
+        </SafeAreaProvider>
+      </AuthProvider>
     </DatabaseProvider>
   );
 }

@@ -18,6 +18,7 @@ import { speciesRouter } from './routes/species';
 import { syncRouter } from './routes/sync';
 import { marketRouter } from './routes/market';
 import { waterQualityRouter } from './routes/waterQuality';
+import { authRouter } from './routes/auth';
 
 // Load environment variables
 dotenv.config();
@@ -66,6 +67,7 @@ app.use('/api/v1/species', speciesRouter);
 app.use('/api/v1/sync', syncRouter);
 app.use('/api/v1/market', marketRouter);
 app.use('/api/v1/water-quality', waterQualityRouter);
+app.use('/api/v1/auth', authRouter);
 
 // Root endpoint
 app.get('/', (req, res) => {
