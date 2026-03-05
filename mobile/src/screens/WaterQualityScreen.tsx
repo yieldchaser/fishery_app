@@ -7,8 +7,9 @@ import {
   View, Text, StyleSheet, ScrollView,
   TouchableOpacity, TextInput, Alert,
   ActivityIndicator, RefreshControl,
-  KeyboardAvoidingView, Platform,
+  Platform,
 } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { waterQualityService } from '../services/apiService';
@@ -106,10 +107,7 @@ export default function WaterQualityScreen() {
   const onRefresh = () => { setRefreshing(true); loadHistory(); };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>{t('waterQuality.title') || 'Water Quality'}</Text>
         <View style={styles.tabContainer}>
@@ -133,7 +131,13 @@ export default function WaterQualityScreen() {
       </View>
 
       {activeTab === 'log' ? (
-        <ScrollView style={styles.content}>
+        <KeyboardAwareScrollView
+          style={styles.content}
+          contentContainerStyle={{ paddingBottom: 40 }}
+          enableOnAndroid={true}
+          extraScrollHeight={20}
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={styles.form}>
             <InputRow label={t('waterQuality.temperature') || 'Temperature (°C)'} icon="thermometer-outline"
               placeholder="28.5" value={temperature} onChangeText={setTemperature} />
@@ -163,7 +167,7 @@ export default function WaterQualityScreen() {
               }
             </TouchableOpacity>
           </View>
-        </ScrollView>
+        </KeyboardAwareScrollView>
       ) : (
         <ScrollView
           style={styles.content}
@@ -212,7 +216,7 @@ export default function WaterQualityScreen() {
           )}
         </ScrollView>
       )}
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
