@@ -132,14 +132,47 @@ export class MarketDataIngestionWorker {
   private async ingestSimulatedData(): Promise<void> {
     logger.info('Updating baseline simulated data');
 
-    const simulatedPrices: MarketPriceEntry[] = [
-      { speciesName: 'Rohu', marketName: 'Kolkata', stateCode: 'WB', priceInrPerKg: 145, grade: 'A', date: new Date(), source: 'MANUAL_ENTRY', volumeKg: 500 },
-      { speciesName: 'Rohu', marketName: 'Hyderabad', stateCode: 'TG', priceInrPerKg: 150, grade: 'A', date: new Date(), source: 'MANUAL_ENTRY', volumeKg: 750 },
-      { speciesName: 'Catla', marketName: 'Kolkata', stateCode: 'WB', priceInrPerKg: 155, grade: 'A', date: new Date(), source: 'MANUAL_ENTRY', volumeKg: 450 },
-      { speciesName: 'Vannamei Shrimp', marketName: 'Visakhapatnam', stateCode: 'AP', priceInrPerKg: 380, grade: '30-count', date: new Date(), source: 'MANUAL_ENTRY', volumeKg: 1200 },
-      { speciesName: 'Pangasius', marketName: 'Nadia', stateCode: 'WB', priceInrPerKg: 175, grade: 'A', date: new Date(), source: 'MANUAL_ENTRY', volumeKg: 2000 },
-      { speciesName: 'Tilapia', marketName: 'Bengaluru', stateCode: 'KA', priceInrPerKg: 160, grade: 'A', date: new Date(), source: 'MANUAL_ENTRY', volumeKg: 600 }
-    ];
+    const speciesAverages: Record<string, number> = {
+      'Vannamei Shrimp': 380,
+      'Black Tiger Shrimp': 620,
+      'Rohu': 145,
+      'Catla': 180,
+      'Mrigal': 130,
+      'Tilapia': 110,
+      'Pangasius': 95,
+      'Sea Bass': 450,
+      'Pompano': 520,
+      'Crab': 800,
+      'Pearl Spot': 350,
+      'Grass Carp': 120,
+      'Silver Carp': 100,
+      'Common Carp': 115,
+    };
+
+    const simulatedPrices: MarketPriceEntry[] = [];
+    const today = new Date();
+
+    for (const [speciesName, basePrice] of Object.entries(speciesAverages)) {
+      // Generate 7 days of data for the sparkline to work
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        // Add some random walk variance (-5% to +5%)
+        const variance = (Math.random() - 0.5) * 0.1;
+        const price = Math.round(basePrice * (1 + variance));
+
+        simulatedPrices.push({
+          speciesName,
+          marketName: 'Global Index',
+          stateCode: 'IN',
+          priceInrPerKg: price,
+          grade: 'Standard',
+          date: d,
+          source: 'MANUAL_ENTRY',
+          volumeKg: 1000
+        });
+      }
+    }
 
     for (const price of simulatedPrices) {
       await this.insertMarketPrice(price);
