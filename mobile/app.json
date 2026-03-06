@@ -5,6 +5,17 @@
     "softwareKeyboardLayoutMode": "pan",
     "plugins": [
       "expo-localization"
+    ],
+    "experiments": {
+      "baseUrl": "/fishery_app"
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "platforms": [
+      "ios",
+      "android",
+      "web"
     ]
   }
 }
