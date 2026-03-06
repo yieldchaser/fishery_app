@@ -164,6 +164,24 @@ const linking: any = {
       AddEditPond: 'pond/:pondId',
     },
   },
+  getStateFromPath: (path: string, options: any) => {
+    // If the path is just the base path or empty, force it to the Home screen
+    if (path === '' || path === '/' || path === '/fishery_app' || path === '/fishery_app/') {
+      return {
+        routes: [
+          {
+            name: 'Main',
+            state: {
+              routes: [{ name: 'Home' }]
+            }
+          }
+        ]
+      };
+    }
+    // Otherwise rely on default parsing
+    const { getStateFromPath } = require('@react-navigation/native');
+    return getStateFromPath(path, options);
+  }
 };
 
 function MainApp() {
