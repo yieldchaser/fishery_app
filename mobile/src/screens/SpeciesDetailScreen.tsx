@@ -40,7 +40,14 @@ export default function SpeciesDetailScreen() {
         {d.image_url ? (
           <Image
             source={{ uri: d.image_url }}
-            style={{ width: '100%', height: 220, borderRadius: 16, marginBottom: 16, backgroundColor: theme.isDark ? '#1a1a1a' : '#f0f0f0' }}
+            style={{
+              width: '100%',
+              height: 220,
+              borderRadius: 16,
+              marginBottom: 16,
+              backgroundColor: theme.isDark ? '#1a1a1a' : '#f0f0f0',
+              transform: enName === 'Rohu' ? [{ scaleY: -1 }] : []
+            }}
             resizeMode="contain"
           />
         ) : (

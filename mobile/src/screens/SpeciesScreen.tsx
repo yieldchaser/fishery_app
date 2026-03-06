@@ -37,7 +37,12 @@ const SpeciesCard = ({ species, onPress, theme, styles }: { species: any; onPres
           {d.image_url ? (
             <Image
               source={{ uri: d.image_url }}
-              style={{ width: '100%', height: '100%', backgroundColor: theme.isDark ? '#1a1a1a' : '#f0f0f0' }}
+              style={{
+                width: '100%',
+                height: '100%',
+                backgroundColor: theme.isDark ? '#1a1a1a' : '#f0f0f0',
+                transform: enName === 'Rohu' ? [{ scaleY: -1 }] : []
+              }}
               resizeMode="contain"
             />
           ) : (
@@ -172,15 +177,15 @@ export default function SpeciesScreen() {
 const getStyles = (theme: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
   header: { padding: 16, backgroundColor: theme.colors.surface, paddingBottom: 8 },
-  title: { fontSize: 24, fontWeight: 'bold', color: theme.colors.primary },
-  subtitle: { fontSize: 14, color: theme.colors.textSecondary, marginTop: 4 },
+  title: { fontSize: 26, fontWeight: 'bold', color: theme.colors.primary },
+  subtitle: { fontSize: 16, color: theme.colors.textSecondary, marginTop: 4 },
   searchBar: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: theme.colors.background, borderRadius: 10, paddingHorizontal: 12,
     paddingVertical: 8, marginTop: 12, gap: 8,
     borderWidth: 1, borderColor: theme.colors.border
   },
-  searchInput: { flex: 1, fontSize: 15, color: theme.colors.textPrimary },
+  searchInput: { flex: 1, fontSize: 17, color: theme.colors.textPrimary },
   list: { padding: 16, backgroundColor: theme.colors.background, flexGrow: 1 },
   card: {
     backgroundColor: theme.colors.surface, borderRadius: 14, padding: 16,
@@ -193,10 +198,10 @@ const getStyles = (theme: any) => StyleSheet.create({
     justifyContent: 'center', alignItems: 'center',
     overflow: 'hidden',
   },
-  speciesName: { fontSize: 16, fontWeight: '600', color: theme.colors.textPrimary },
-  scientificName: { fontSize: 13, fontStyle: 'italic', color: theme.colors.textSecondary, marginTop: 2 },
+  speciesName: { fontSize: 18, fontWeight: '600', color: theme.colors.textPrimary },
+  scientificName: { fontSize: 15, fontStyle: 'italic', color: theme.colors.textSecondary, marginTop: 2 },
   badge: {
-    alignSelf: 'flex-start', marginTop: 8, fontSize: 11,
+    alignSelf: 'flex-start', marginTop: 8, fontSize: 13,
     backgroundColor: theme.isDark ? '#1a3a1f' : '#E8F5E9',
     color: theme.isDark ? '#4CAF50' : '#2E7D32',
     paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6, fontWeight: '500',
@@ -205,5 +210,5 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   parameters: { flexDirection: 'row', gap: 16, marginTop: 10 },
   paramItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  paramText: { fontSize: 12, color: theme.colors.textSecondary },
+  paramText: { fontSize: 14, color: theme.colors.textSecondary },
 });

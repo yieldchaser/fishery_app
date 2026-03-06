@@ -406,7 +406,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     backgroundColor: theme.colors.background
   },
   pickerText: {
-    fontSize: 16,
+    fontSize: 18,
     color: theme.colors.textPrimary,
     flex: 1
   },
@@ -472,7 +472,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     borderBottomColor: theme.colors.border
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: theme.colors.textPrimary
   },
@@ -482,7 +482,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     borderBottomColor: theme.colors.border
   },
   modalItemText: {
-    fontSize: 16,
+    fontSize: 18,
     color: theme.colors.textPrimary
   }
 });

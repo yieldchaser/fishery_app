@@ -42,13 +42,13 @@ export const lightTheme = {
         }
     },
     typography: {
-        h1: { fontSize: 28, fontWeight: '700' as const, color: '#0F172A' },
-        h2: { fontSize: 24, fontWeight: '600' as const, color: '#0F172A' },
-        h3: { fontSize: 18, fontWeight: '600' as const, color: '#0F172A' },
-        bodyLarge: { fontSize: 16, fontWeight: '400' as const, color: '#475569', lineHeight: 24 },
-        body: { fontSize: 14, fontWeight: '400' as const, color: '#475569', lineHeight: 20 },
-        caption: { fontSize: 12, fontWeight: '400' as const, color: '#94A3B8' },
-        buttonText: { fontSize: 16, fontWeight: '600' as const },
+        h1: { fontSize: 30, fontWeight: '700' as const, color: '#0F172A' },
+        h2: { fontSize: 26, fontWeight: '600' as const, color: '#0F172A' },
+        h3: { fontSize: 20, fontWeight: '600' as const, color: '#0F172A' },
+        bodyLarge: { fontSize: 18, fontWeight: '400' as const, color: '#475569', lineHeight: 26 },
+        body: { fontSize: 16, fontWeight: '400' as const, color: '#475569', lineHeight: 22 },
+        caption: { fontSize: 13, fontWeight: '400' as const, color: '#94A3B8' },
+        buttonText: { fontSize: 18, fontWeight: '600' as const },
     }
 };
 

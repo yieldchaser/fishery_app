@@ -185,28 +185,28 @@ const getStyles = (theme: any) => StyleSheet.create({
 
   header: { alignItems: 'center', paddingTop: 36, paddingBottom: 28, paddingHorizontal: 16, backgroundColor: theme.colors.primary },
   avatar: { width: 76, height: 76, borderRadius: 38, backgroundColor: 'rgba(255,255,255,0.25)', justifyContent: 'center', alignItems: 'center', marginBottom: 12 },
-  initials: { fontSize: 28, fontWeight: '700', color: theme.colors.textInverse },
-  name: { fontSize: 20, fontWeight: '700', color: theme.colors.textInverse },
-  phone: { fontSize: 13, color: 'rgba(255,255,255,0.8)', marginTop: 3 },
+  initials: { fontSize: 30, fontWeight: '700', color: theme.colors.textInverse },
+  name: { fontSize: 22, fontWeight: '700', color: theme.colors.textInverse },
+  phone: { fontSize: 15, color: 'rgba(255,255,255,0.8)', marginTop: 3 },
   badge: { backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 16, marginTop: 8 },
-  badgeText: { color: theme.colors.textInverse, fontSize: 12, fontWeight: '600' },
-  stateLabel: { color: 'rgba(255,255,255,0.7)', fontSize: 12, marginTop: 4 },
+  badgeText: { color: theme.colors.textInverse, fontSize: 14, fontWeight: '600' },
+  stateLabel: { color: 'rgba(255,255,255,0.7)', fontSize: 14, marginTop: 4 },
 
   syncBanner: {
     flexDirection: 'row', alignItems: 'center', backgroundColor: theme.colors.success,
     paddingHorizontal: 16, paddingVertical: 10, gap: 10,
   },
-  syncBannerText: { color: theme.colors.textInverse, fontSize: 13, fontWeight: '500' },
+  syncBannerText: { color: theme.colors.textInverse, fontSize: 15, fontWeight: '500' },
 
   menu: { marginTop: 16, backgroundColor: theme.colors.surface, borderRadius: 12, marginHorizontal: 12, overflow: 'hidden', elevation: 1 },
   menuItem: { flexDirection: 'row', alignItems: 'center', padding: 14, borderBottomWidth: 1, borderBottomColor: theme.colors.background },
   iconWrap: { width: 36, height: 36, borderRadius: 10, backgroundColor: theme.colors.primaryLight, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
   iconWrapDanger: { backgroundColor: theme.colors.error + '20' }, // adding transparency hex
   menuTextBlock: { flex: 1 },
-  menuText: { fontSize: 15, color: theme.colors.textPrimary, fontWeight: '500' },
-  menuSub: { fontSize: 12, color: theme.colors.textSecondary, marginTop: 1 },
-  menuValue: { fontSize: 13, color: theme.colors.textMuted, fontWeight: '500', marginRight: 8 },
+  menuText: { fontSize: 17, color: theme.colors.textPrimary, fontWeight: '500' },
+  menuSub: { fontSize: 14, color: theme.colors.textSecondary, marginTop: 1 },
+  menuValue: { fontSize: 15, color: theme.colors.textMuted, fontWeight: '500', marginRight: 8 },
   dangerText: { color: theme.colors.error },
 
-  version: { textAlign: 'center', color: theme.colors.textMuted, fontSize: 12, marginTop: 24, marginBottom: 32 },
+  version: { textAlign: 'center', color: theme.colors.textMuted, fontSize: 14, marginTop: 24, marginBottom: 32 },
 });
