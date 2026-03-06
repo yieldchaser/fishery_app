@@ -50,7 +50,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     if (!isReady) {
-        return null;
+        return (
+            <React.Fragment>
+                <div style={{ padding: 20, color: '#333' }}>Loading Theme Context...</div>
+            </React.Fragment>
+        );
     }
 
     return (

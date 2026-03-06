@@ -25,7 +25,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setIsAuthenticated(false);
     };
 
-    if (loading) return null; // Or a splash screen
+    if (loading) return (
+        <React.Fragment>
+            <div style={{ padding: 20, color: '#333' }}>Loading Auth Context...</div>
+        </React.Fragment>
+    );
 
     return (
         <AuthContext.Provider value={{ isAuthenticated, login, logout }}>

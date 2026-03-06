@@ -141,6 +141,7 @@ function MainTabs() {
 }
 
 function MainApp() {
+  console.log('Rendering MainApp');
   const { isAuthenticated, login } = useAuth();
   const { theme, mode } = useTheme();
 
@@ -174,6 +175,7 @@ function MainApp() {
 }
 
 function App() {
+  console.log('App mounting...');
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <DatabaseProvider database={database}>
