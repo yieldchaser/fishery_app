@@ -408,36 +408,57 @@ export class EconomicsSimulatorService {
     expectedYield: number
   ): SpeciesRecommendation[] {
     return species.map(s => {
-      const avgFcr = (s.economic_parameters.feed_conversion_ratio.min +
-        s.economic_parameters.feed_conversion_ratio.max) / 2;
-      const avgPrice = (s.economic_parameters.market_price_per_kg_inr.min +
-        s.economic_parameters.market_price_per_kg_inr.max) / 2;
+      const avgFcr = (s.economic_parameters.feed_conversion_ratio?.min +
+        s.economic_parameters.feed_conversion_ratio?.max) / 2 || 1.8;
+      const avgPrice = (s.economic_parameters.market_price_per_kg_inr?.min +
+        s.economic_parameters.market_price_per_kg_inr?.max) / 2 || 120;
 
-      let score = 70;
+      // Start with a more dynamic base score
+      let score = 60;
 
-      if (input.availableCapitalInr > 500000) score += 10;
-      else if (input.availableCapitalInr < 100000) score -= 10;
+      // 1. Capital Alignment (Max ±15)
+      // High maintenance species need more capital
+      const capitalPerHa = input.availableCapitalInr / input.landSizeHectares;
+      if (capitalPerHa < 100000 && (avgFcr < 1.3 || s.scientific_name.includes('vannamei'))) {
+        score -= 15; // Penalize high-input species for low-capital farmers
+      } else if (capitalPerHa > 500000) {
+        score += 10;
+      }
 
-      if (input.riskTolerance === RiskTolerance.HIGH && avgFcr < 1.5) score += 10;
-      if (input.riskTolerance === RiskTolerance.LOW && avgFcr < 1.5) score += 15;
+      // 2. Risk Tolerance Alignment (Max ±15)
+      const isHighValue = avgPrice > 300;
+      if (input.riskTolerance === RiskTolerance.LOW && (isHighValue || avgFcr < 1.2)) {
+        score -= 10; // Low tolerance farmers shouldn't do high-risk shrimp as easily
+      } else if (input.riskTolerance === RiskTolerance.HIGH && isHighValue) {
+        score += 15;
+      }
 
-      const yieldScore = Math.min(20, (expectedYield / 1000));
-      score += yieldScore;
+      // 3. Efficiency (FCR) Score (Max ±10)
+      if (avgFcr < 1.4) score += 10;
+      else if (avgFcr > 2.0) score -= 10;
 
-      const speciesYield = expectedYield * (s.economic_parameters.survival_rate_percent.max / 100);
-      const speciesRevenue = speciesYield * avgPrice;
+      // 4. Profit Potential (Max ±15)
+      // Dynamic yield based on survival
+      const speciesYield = expectedYield * ((s.economic_parameters.survival_rate_percent?.max || 80) / 100);
+      const estRevenue = speciesYield * avgPrice;
+      const profitMargin = estRevenue / (input.availableCapitalInr || 1);
+
+      if (profitMargin > 2.5) score += 15;
+      else if (profitMargin > 1.5) score += 5;
+      else score -= 10;
 
       return {
         speciesId: s.scientific_name,
-        commonName: s.common_names.en,
+        commonName: s.common_names?.en || 'Unknown',
         scientificName: s.scientific_name,
-        compatibilityScore: Math.min(100, Math.round(score)),
+        compatibilityScore: Math.min(100, Math.max(20, Math.round(score))),
         expectedYieldKg: Math.round(speciesYield),
-        expectedRevenueInr: Math.round(speciesRevenue),
+        expectedRevenueInr: Math.round(estRevenue),
+        fcr: avgFcr,
         compatibilityReasons: [
-          `Optimal temperature range: ${s.biological_parameters.temperature_celsius.min}°C - ${s.biological_parameters.temperature_celsius.max}°C`,
-          `Feed Conversion Ratio: ${avgFcr}`,
-          `Expected survival rate: ${s.economic_parameters.survival_rate_percent.max}%`
+          `FCR: ${avgFcr.toFixed(2)} (${avgFcr < 1.5 ? 'Very Efficient' : 'Average Efficiency'})`,
+          `Est. Survival: ${s.economic_parameters.survival_rate_percent?.max || 80}%`,
+          `Profit Potential: ${profitMargin > 2 ? 'Excellent' : profitMargin > 1.2 ? 'Good' : 'Moderate'}`
         ]
       };
     }).sort((a, b) => b.compatibilityScore - a.compatibilityScore);
