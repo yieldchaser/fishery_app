@@ -13,6 +13,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Platform } from 'react-native';
 
 import './src/i18n';
 import { DatabaseProvider } from '@nozbe/watermelondb/react';
@@ -189,7 +190,10 @@ function MainApp() {
   const { isAuthenticated, login } = useAuth();
   const { theme, mode } = useTheme();
 
-  if (!isAuthenticated) {
+  // On web: bypass auth gate — no live backend available, go straight to app
+  const showAuth = Platform.OS !== 'web' && !isAuthenticated;
+
+  if (showAuth) {
     return <AuthScreen onLoginSuccess={login} />;
   }
 
