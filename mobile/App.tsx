@@ -140,6 +140,32 @@ function MainTabs() {
   );
 }
 
+const linking: any = {
+  prefixes: ['/fishery_app', 'https://yieldchaser.github.io/fishery_app'],
+  config: {
+    screens: {
+      Main: {
+        screens: {
+          Home: '',
+          Species: 'species',
+          Economics: 'economics',
+          Maps: 'maps',
+          Profile: 'profile',
+        },
+      },
+      SpeciesDetail: 'species/:speciesId',
+      EconomicsResult: 'economics/result',
+      WaterQuality: 'water-quality',
+      MarketPrices: 'market-prices',
+      EquipmentCatalog: 'equipment',
+      FeedCatalog: 'feed',
+      PersonalInfo: 'personal-info',
+      PondsList: 'ponds',
+      AddEditPond: 'pond/:pondId',
+    },
+  },
+};
+
 function MainApp() {
   console.log('Rendering MainApp');
   const { isAuthenticated, login } = useAuth();
@@ -150,7 +176,7 @@ function MainApp() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Stack.Navigator
         screenOptions={{
           headerStyle: { backgroundColor: theme.colors.surface },
