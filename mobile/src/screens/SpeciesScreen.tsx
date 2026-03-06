@@ -51,6 +51,7 @@ const SpeciesCard = ({ species, onPress, theme, styles }: { species: any; onPres
         <View style={{ flex: 1 }}>
           <Text style={styles.speciesName}>{commonName}</Text>
           <Text style={styles.scientificName}>{d.scientific_name}</Text>
+          {d.description && <Text style={styles.description} numberOfLines={2}>{d.description}</Text>}
         </View>
         <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
       </View>
@@ -203,6 +204,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   speciesName: { fontSize: 18, fontWeight: '600', color: theme.colors.textPrimary },
   scientificName: { fontSize: 15, fontStyle: 'italic', color: theme.colors.textSecondary, marginTop: 2 },
+  description: { fontSize: 13, color: theme.colors.textSecondary, marginTop: 4, lineHeight: 18 },
   badge: {
     alignSelf: 'flex-start', marginTop: 8, fontSize: 13,
     backgroundColor: theme.isDark ? '#1a3a1f' : '#E8F5E9',

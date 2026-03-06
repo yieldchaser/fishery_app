@@ -65,6 +65,9 @@ export default function SpeciesDetailScreen() {
           <Text style={styles.title}>{commonName}</Text>
           <Text style={styles.scientificName}>{d.scientific_name}</Text>
           {d.category && <Text style={styles.badge}>{(d.category || '').replace(/_/g, ' ')}</Text>}
+          {d.description && (
+            <Text style={styles.description}>{d.description}</Text>
+          )}
         </View>
 
         <View style={styles.section}>
@@ -231,6 +234,14 @@ const getStyles = (theme: any) => StyleSheet.create({
     backgroundColor: theme.isDark ? '#1a3a1f' : '#E8F5E9', color: theme.colors.success,
     paddingHorizontal: 12, paddingVertical: 4, borderRadius: theme.borderRadius.sm,
     fontWeight: '600', textTransform: 'uppercase', overflow: 'hidden',
+  },
+  description: {
+    marginTop: theme.spacing.md,
+    ...theme.typography.body,
+    color: theme.colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+    paddingHorizontal: theme.spacing.sm,
   },
   section: { marginTop: theme.spacing.md, paddingHorizontal: theme.spacing.md },
   sectionTitle: { ...theme.typography.h3, color: theme.colors.textPrimary, marginBottom: theme.spacing.sm },
