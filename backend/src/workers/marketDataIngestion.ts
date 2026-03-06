@@ -53,15 +53,27 @@ export class MarketDataIngestionWorker {
       // 1. Get all unique species from our knowledge base
       const speciesResult = await query(`
         SELECT DISTINCT data->>'scientific_name' as scientific_name, 
-               data->'common_names'->>'en' as common_name 
+               data->'common_names'->>'en' as common_name,
+               data->'economic_parameters'->'market_price_per_kg_inr'->>'min' as min_price_1,
+               data->'economic_parameters'->'market_price_per_kg_inr'->>'max' as max_price_1,
+               data->'economic_parameters'->'market_price_inr_per_kg'->>'min' as min_price_2,
+               data->'economic_parameters'->'market_price_inr_per_kg'->>'max' as max_price_2
         FROM knowledge_nodes 
         WHERE node_type = 'SPECIES'
       `);
 
-      const targetSpecies = speciesResult.rows.map(r => ({
-        scientific: r.scientific_name,
-        common: r.common_name
-      }));
+      const targetSpecies = speciesResult.rows.map(r => {
+        let minPrice = parseFloat(r.min_price_1 || r.min_price_2 || '100');
+        let maxPrice = parseFloat(r.max_price_1 || r.max_price_2 || '150');
+        if (isNaN(minPrice)) minPrice = 100;
+        if (isNaN(maxPrice)) maxPrice = 150;
+
+        return {
+          scientific: r.scientific_name,
+          common: r.common_name || r.scientific_name,
+          basePrice: (minPrice + maxPrice) / 2
+        };
+      });
 
       logger.info(`Targeting ${targetSpecies.length} species for price updates`);
 
@@ -70,7 +82,7 @@ export class MarketDataIngestionWorker {
       await this.scrapeNFDB(targetSpecies);
 
       // 3. Fallback/Seed simulated data for missing ones
-      await this.ingestSimulatedData();
+      await this.ingestSimulatedData(targetSpecies);
 
       logger.info('Market data ingestion completed successfully');
     } catch (error) {
@@ -129,30 +141,15 @@ export class MarketDataIngestionWorker {
     // For now, we log the attempt
   }
 
-  private async ingestSimulatedData(): Promise<void> {
+  private async ingestSimulatedData(targets: any[]): Promise<void> {
     logger.info('Updating baseline simulated data');
-
-    const speciesAverages: Record<string, number> = {
-      'Vannamei Shrimp': 380,
-      'Black Tiger Shrimp': 620,
-      'Rohu': 145,
-      'Catla': 180,
-      'Mrigal': 130,
-      'Tilapia': 110,
-      'Pangasius': 95,
-      'Sea Bass': 450,
-      'Pompano': 520,
-      'Crab': 800,
-      'Pearl Spot': 350,
-      'Grass Carp': 120,
-      'Silver Carp': 100,
-      'Common Carp': 115,
-    };
 
     const simulatedPrices: MarketPriceEntry[] = [];
     const today = new Date();
 
-    for (const [speciesName, basePrice] of Object.entries(speciesAverages)) {
+    for (const target of targets) {
+      const speciesName = target.common;
+      const basePrice = target.basePrice;
       // Generate 7 days of data for the sparkline to work
       for (let i = 0; i < 7; i++) {
         const d = new Date(today);

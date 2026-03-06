@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { marketService } from '../services/apiService';
+import { marketService, speciesService } from '../services/apiService';
 import { useTheme } from '../ThemeContext';
 import ScreenHeader from '../components/ScreenHeader';
 import SparkLine from '../components/SparkLine';
@@ -28,64 +28,8 @@ interface PriceRow {
   source?: string;
 }
 
-// High quality fish images from Wikimedia Commons / public domain
-const FISH_IMAGES: Record<string, string> = {
-  'Vannamei Shrimp': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Vannamei8.jpg/640px-Vannamei8.jpg',
-  'Black Tiger Shrimp': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Penaeus_monodon_Bali.jpg/640px-Penaeus_monodon_Bali.jpg',
-  'Rohu': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Labeo_rohita.jpg/640px-Labeo_rohita.jpg',
-  'Catla': 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Catla_catla.jpg/640px-Catla_catla.jpg',
-  'Mrigal': 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Cirrhinus_mrigala.jpg/640px-Cirrhinus_mrigala.jpg',
-  'Tilapia': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Tilapia_%28Oreochromis_niloticus%29.jpg/640px-Tilapia_%28Oreochromis_niloticus%29.jpg',
-  'Pangasius': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Pangasianodon_hypophthalmus.jpg/640px-Pangasianodon_hypophthalmus.jpg',
-  'Sea Bass': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Lates_calcarifer.jpg/640px-Lates_calcarifer.jpg',
-  'Pompano': 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Trachinotus_blochii.jpg/640px-Trachinotus_blochii.jpg',
-  'Crab': 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Scylla_serrata_in_Mangroves.jpg/640px-Scylla_serrata_in_Mangroves.jpg',
-  'Pearl Spot': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Etroplus_suratensis.jpg/640px-Etroplus_suratensis.jpg',
-  'Grass Carp': 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Grass_carp_%28Ctenopharyngodon_idella%29.jpg/640px-Grass_carp_%28Ctenopharyngodon_idella%29.jpg',
-  'Silver Carp': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Hypophthalmichthys_molitrix.jpg/640px-Hypophthalmichthys_molitrix.jpg',
-  'Common Carp': 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Cyprinus_carpio.jpeg/640px-Cyprinus_carpio.jpeg',
-};
-
-// Average prices from industry benchmarks (INR/kg)
-const SPECIES_AVG_PRICES: Record<string, number> = {
-  'Vannamei Shrimp': 380,
-  'Black Tiger Shrimp': 620,
-  'Rohu': 145,
-  'Catla': 180,
-  'Mrigal': 130,
-  'Tilapia': 110,
-  'Pangasius': 95,
-  'Sea Bass': 450,
-  'Pompano': 520,
-  'Crab': 800,
-  'Pearl Spot': 350,
-  'Grass Carp': 120,
-  'Silver Carp': 100,
-  'Common Carp': 115,
-};
-
-function getFishImage(speciesName: string): string | null {
-  if (!speciesName) return null;
-  const name = speciesName.trim();
-  // Direct match
-  if (FISH_IMAGES[name]) return FISH_IMAGES[name];
-  // Partial match
-  const key = Object.keys(FISH_IMAGES).find(k =>
-    name.toLowerCase().includes(k.toLowerCase()) ||
-    k.toLowerCase().includes(name.toLowerCase())
-  );
-  return key ? FISH_IMAGES[key] : null;
-}
-
-function getSpeciesAvgPrice(speciesName: string, liveAvg: number): number {
-  if (!speciesName) return liveAvg;
-  const name = speciesName.trim();
-  if (SPECIES_AVG_PRICES[name]) return SPECIES_AVG_PRICES[name];
-  const key = Object.keys(SPECIES_AVG_PRICES).find(k =>
-    name.toLowerCase().includes(k.toLowerCase()) ||
-    k.toLowerCase().includes(name.toLowerCase())
-  );
-  return key ? SPECIES_AVG_PRICES[key] : liveAvg;
+date: string;
+source ?: string;
 }
 
 function trendIcon(price: number, avg: number, theme: any) {
@@ -116,19 +60,28 @@ export default function MarketPricesScreen() {
   const navigation = useNavigation<any>();
 
   const [prices, setPrices] = useState<PriceRow[]>([]);
+  const [speciesData, setSpeciesData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   // B10 FIX: initialized as null so we don't show a fake "200" before data loads
   const [globalAvg, setGlobalAvg] = useState<number | null>(null);
 
-  const loadPrices = useCallback(async () => {
+  const loadData = useCallback(async () => {
     try {
-      const res = await marketService.getPrices();
-      if (res.success && res.data) {
-        setPrices(res.data);
-        if (res.data.length > 0) {
-          const total = res.data.reduce((s: number, r: PriceRow) => s + parseFloat(r.price_inr_per_kg), 0);
-          setGlobalAvg(total / res.data.length);
+      const [marketRes, speciesRes] = await Promise.all([
+        marketService.getPrices(),
+        speciesService.getAll()
+      ]);
+
+      if (speciesRes.success && speciesRes.data) {
+        setSpeciesData(speciesRes.data);
+      }
+
+      if (marketRes.success && marketRes.data) {
+        setPrices(marketRes.data);
+        if (marketRes.data.length > 0) {
+          const total = marketRes.data.reduce((s: number, r: PriceRow) => s + parseFloat(r.price_inr_per_kg), 0);
+          setGlobalAvg(total / marketRes.data.length);
         } else {
           setGlobalAvg(null);
         }
@@ -141,9 +94,43 @@ export default function MarketPricesScreen() {
     }
   }, []);
 
-  useEffect(() => { loadPrices(); }, [loadPrices]);
+  useEffect(() => { loadData(); }, [loadData]);
 
-  const onRefresh = () => { setRefreshing(true); loadPrices(); };
+  const onRefresh = () => { setRefreshing(true); loadData(); };
+
+  const getFishImage = useCallback((speciesName: string) => {
+    if (!speciesName) return null;
+    const name = speciesName.trim().toLowerCase();
+
+    const match = speciesData.find(s => {
+      const d = s.data || {};
+      const common = (d.common_names?.en || '').toLowerCase();
+      const scientific = (d.scientific_name || '').toLowerCase();
+      return common.includes(name) || name.includes(common) ||
+        scientific.includes(name) || name.includes(scientific);
+    });
+
+    return match?.data?.image_url || null;
+  }, [speciesData]);
+
+  const getSpeciesAvgPrice = useCallback((speciesName: string, liveAvg: number) => {
+    if (!speciesName) return liveAvg;
+    const name = speciesName.trim().toLowerCase();
+
+    const match = speciesData.find(s => {
+      const d = s.data || {};
+      const common = (d.common_names?.en || '').toLowerCase();
+      const scientific = (d.scientific_name || '').toLowerCase();
+      return common.includes(name) || name.includes(common) ||
+        scientific.includes(name) || name.includes(scientific);
+    });
+
+    if (match) {
+      const p = match.data?.economic_parameters?.market_price_per_kg_inr || match.data?.economic_parameters?.market_price_inr_per_kg;
+      if (p && p.min && p.max) return (p.min + p.max) / 2;
+    }
+    return liveAvg;
+  }, [speciesData]);
 
   if (isLoading) {
     return (
