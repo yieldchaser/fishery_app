@@ -28,10 +28,6 @@ interface PriceRow {
   source?: string;
 }
 
-date: string;
-source ?: string;
-}
-
 function trendIcon(price: number, avg: number, theme: any) {
   if (price > avg * 1.05) return { name: 'trending-up-outline', color: theme.colors.success };
   if (price < avg * 0.95) return { name: 'trending-down-outline', color: theme.colors.error };
