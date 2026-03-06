@@ -114,11 +114,12 @@ export default function EquipmentCatalogScreen() {
     }
 
     return (
-        <SafeAreaView style={styles.container} edges={['top']}>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.surface }]} edges={['top']}>
             <View style={styles.header}>
                 <View style={styles.headerTop}>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <TouchableOpacity onPress={() => (navigation as any).navigate('Main', { screen: 'Home' })} style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <Ionicons name="arrow-back" size={24} color={theme.colors.textPrimary} />
+                        <Text style={{ marginLeft: 8, fontSize: 16, color: theme.colors.textPrimary, fontWeight: '600' }}>Home</Text>
                     </TouchableOpacity>
                     <Text style={styles.title}>Equipment Catalog</Text>
                 </View>

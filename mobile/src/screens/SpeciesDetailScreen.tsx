@@ -3,7 +3,8 @@
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -35,161 +36,176 @@ export default function SpeciesDetailScreen() {
   const commonName = translatedName || d.common_names?.[currentLang] || enName || d.scientific_name;
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        {d.image_url ? (
-          <Image
-            source={{ uri: d.image_url }}
-            style={{
-              width: '100%',
-              height: 220,
-              borderRadius: 16,
-              marginBottom: 16,
-              backgroundColor: theme.isDark ? '#1a1a1a' : '#f0f0f0',
-              transform: enName === 'Rohu' ? [{ scaleY: -1 }] : []
-            }}
-            resizeMode="contain"
-          />
-        ) : (
-          <View style={styles.iconWrap}>
-            <Ionicons name="fish" size={48} color={theme.colors.surface} />
+    <SafeAreaView style={styles.safeContainer} edges={['top']}>
+      {/* Back navigation header */}
+      <View style={styles.navBar}>
+        <TouchableOpacity
+          onPress={() => (navigation as any).navigate('Main', { screen: 'Home' })}
+          hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+          style={[styles.navBackBtn, { flexDirection: 'row', alignItems: 'center' }]}
+        >
+          <Ionicons name="arrow-back" size={24} color={theme.colors.textPrimary} />
+          <Text style={{ marginLeft: 8, fontSize: 16, color: theme.colors.textPrimary, fontWeight: '600' }}>Home</Text>
+        </TouchableOpacity>
+        <Text style={styles.navTitle} numberOfLines={1}>{commonName}</Text>
+        <View style={{ width: 32 }} />
+      </View>
+      <ScrollView style={styles.container}>
+        <View style={styles.header}>
+          {d.image_url ? (
+            <Image
+              source={{ uri: d.image_url }}
+              style={{
+                width: '100%',
+                height: 220,
+                borderRadius: 16,
+                marginBottom: 16,
+                backgroundColor: theme.isDark ? '#1a1a1a' : '#f0f0f0',
+                transform: enName === 'Rohu' ? [{ scaleY: -1 }] : []
+              }}
+              resizeMode="contain"
+            />
+          ) : (
+            <View style={styles.iconWrap}>
+              <Ionicons name="fish" size={48} color={theme.colors.surface} />
+            </View>
+          )}
+          <Text style={styles.title}>{commonName}</Text>
+          <Text style={styles.scientificName}>{d.scientific_name}</Text>
+          {d.category && <Text style={styles.badge}>{(d.category || '').replace(/_/g, ' ')}</Text>}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('species.biologicalParameters') || 'Biological Parameters'}</Text>
+          <View style={styles.paramCard}>
+            <ParamRow
+              theme={theme}
+              styles={styles}
+              icon="thermometer-outline"
+              label={t('species.temperature') || 'Temperature'}
+              value={`${params.temperature_celsius?.min}°C - ${params.temperature_celsius?.max}°C`}
+            />
+            <ParamRow
+              theme={theme}
+              styles={styles}
+              icon="water-outline"
+              label={t('species.dissolvedOxygen') || 'Min. DO'}
+              value={`> ${params.dissolved_oxygen_mg_l?.min || params.min_do || '5.0'} mg/L`}
+            />
+            <ParamRow
+              theme={theme}
+              styles={styles}
+              icon="flask-outline"
+              label={t('species.ph') || 'pH Range'}
+              value={`${params.ph_range?.min || '6.5'} - ${params.ph_range?.max || '8.5'}`}
+            />
+            <ParamRow
+              theme={theme}
+              styles={styles}
+              icon="sunny-outline"
+              label={t('species.salinity') || 'Salinity Tolerance'}
+              value={`${params.salinity_tolerance_ppt?.min || 0} - ${params.salinity_tolerance_ppt?.max || 5} ppt`}
+            />
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('species.economicParameters') || 'Economic Projections'}</Text>
+          <View style={styles.paramCard}>
+            {d.excel_economics ? (
+              <>
+                <ParamRow
+                  theme={theme}
+                  styles={styles}
+                  icon="cash-outline"
+                  label="Benchmark Market Price"
+                  value={`₹${d.excel_economics.market_price_inr_kg}/kg`}
+                />
+                <ParamRow
+                  theme={theme}
+                  styles={styles}
+                  icon="time-outline"
+                  label="Culture Duration"
+                  value={`${d.excel_economics.culture_period_months} months`}
+                />
+                <ParamRow
+                  theme={theme}
+                  styles={styles}
+                  icon="analytics-outline"
+                  label="Typical Survival"
+                  value={`${d.excel_economics.harvest_survival_percent}%`}
+                />
+                <ParamRow
+                  theme={theme}
+                  styles={styles}
+                  icon="business-outline"
+                  label="CAPEX (Infrastructure)"
+                  value={`₹${d.excel_economics.capital_investment_lakh_ha} Lakh / Ha`}
+                />
+                <ParamRow
+                  theme={theme}
+                  styles={styles}
+                  icon="receipt-outline"
+                  label="OPEX (Per Crop)"
+                  value={`₹${d.excel_economics.operational_cost_lakh_ha_crop} Lakh / Ha`}
+                />
+                <ParamRow
+                  theme={theme}
+                  styles={styles}
+                  icon="refresh-outline"
+                  label="Crops per Year"
+                  value={`${d.excel_economics.crops_per_year}`}
+                />
+              </>
+            ) : (
+              <>
+                <ParamRow
+                  theme={theme}
+                  styles={styles}
+                  icon="nutrition-outline"
+                  label={t('species.feedConversionRatio') || 'Avg. FCR'}
+                  value={`${econ.feed_conversion_ratio?.min || 1.2} - ${econ.feed_conversion_ratio?.max || 1.8}`}
+                />
+                <ParamRow
+                  theme={theme}
+                  styles={styles}
+                  icon="trending-up-outline"
+                  label={t('species.expectedYield') || 'Expected Yield'}
+                  value={`${econ.expected_yield_mt_per_acre?.min || 3}-${econ.expected_yield_mt_per_acre?.max || 5} MT/Acre`}
+                />
+                <ParamRow
+                  theme={theme}
+                  styles={styles}
+                  icon="cash-outline"
+                  label={t('species.marketPrice') || 'Market Price'}
+                  value={`₹${econ.market_price_per_kg_inr?.min || 100}-${econ.market_price_per_kg_inr?.max || 150}/kg`}
+                />
+                <ParamRow
+                  theme={theme}
+                  styles={styles}
+                  icon="time-outline"
+                  label={t('species.culturePeriod') || 'Culture Period'}
+                  value={`${d.culture_period_months?.min || 8}-${d.culture_period_months?.max || 10} months`}
+                />
+              </>
+            )}
+          </View>
+        </View>
+
+        {d.optimal_systems && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Optimal Systems</Text>
+            <View style={styles.systemsRow}>
+              {d.optimal_systems.map((s: string, idx: number) => (
+                <View key={idx} style={styles.systemBadge}>
+                  <Text style={styles.systemBadgeText}>{s.replace(/_/g, ' ')}</Text>
+                </View>
+              ))}
+            </View>
           </View>
         )}
-        <Text style={styles.title}>{commonName}</Text>
-        <Text style={styles.scientificName}>{d.scientific_name}</Text>
-        {d.category && <Text style={styles.badge}>{(d.category || '').replace(/_/g, ' ')}</Text>}
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('species.biologicalParameters') || 'Biological Parameters'}</Text>
-        <View style={styles.paramCard}>
-          <ParamRow
-            theme={theme}
-            styles={styles}
-            icon="thermometer-outline"
-            label={t('species.temperature') || 'Temperature'}
-            value={`${params.temperature_celsius?.min}°C - ${params.temperature_celsius?.max}°C`}
-          />
-          <ParamRow
-            theme={theme}
-            styles={styles}
-            icon="water-outline"
-            label={t('species.dissolvedOxygen') || 'Min. DO'}
-            value={`> ${params.dissolved_oxygen_mg_l?.min || params.min_do || '5.0'} mg/L`}
-          />
-          <ParamRow
-            theme={theme}
-            styles={styles}
-            icon="flask-outline"
-            label={t('species.ph') || 'pH Range'}
-            value={`${params.ph_range?.min || '6.5'} - ${params.ph_range?.max || '8.5'}`}
-          />
-          <ParamRow
-            theme={theme}
-            styles={styles}
-            icon="sunny-outline"
-            label={t('species.salinity') || 'Salinity Tolerance'}
-            value={`${params.salinity_tolerance_ppt?.min || 0} - ${params.salinity_tolerance_ppt?.max || 5} ppt`}
-          />
-        </View>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>{t('species.economicParameters') || 'Economic Projections'}</Text>
-        <View style={styles.paramCard}>
-          {d.excel_economics ? (
-            <>
-              <ParamRow
-                theme={theme}
-                styles={styles}
-                icon="cash-outline"
-                label="Benchmark Market Price"
-                value={`₹${d.excel_economics.market_price_inr_kg}/kg`}
-              />
-              <ParamRow
-                theme={theme}
-                styles={styles}
-                icon="time-outline"
-                label="Culture Duration"
-                value={`${d.excel_economics.culture_period_months} months`}
-              />
-              <ParamRow
-                theme={theme}
-                styles={styles}
-                icon="analytics-outline"
-                label="Typical Survival"
-                value={`${d.excel_economics.harvest_survival_percent}%`}
-              />
-              <ParamRow
-                theme={theme}
-                styles={styles}
-                icon="business-outline"
-                label="CAPEX (Infrastructure)"
-                value={`₹${d.excel_economics.capital_investment_lakh_ha} Lakh / Ha`}
-              />
-              <ParamRow
-                theme={theme}
-                styles={styles}
-                icon="receipt-outline"
-                label="OPEX (Per Crop)"
-                value={`₹${d.excel_economics.operational_cost_lakh_ha_crop} Lakh / Ha`}
-              />
-              <ParamRow
-                theme={theme}
-                styles={styles}
-                icon="refresh-outline"
-                label="Crops per Year"
-                value={`${d.excel_economics.crops_per_year}`}
-              />
-            </>
-          ) : (
-            <>
-              <ParamRow
-                theme={theme}
-                styles={styles}
-                icon="nutrition-outline"
-                label={t('species.feedConversionRatio') || 'Avg. FCR'}
-                value={`${econ.feed_conversion_ratio?.min || 1.2} - ${econ.feed_conversion_ratio?.max || 1.8}`}
-              />
-              <ParamRow
-                theme={theme}
-                styles={styles}
-                icon="trending-up-outline"
-                label={t('species.expectedYield') || 'Expected Yield'}
-                value={`${econ.expected_yield_mt_per_acre?.min || 3}-${econ.expected_yield_mt_per_acre?.max || 5} MT/Acre`}
-              />
-              <ParamRow
-                theme={theme}
-                styles={styles}
-                icon="cash-outline"
-                label={t('species.marketPrice') || 'Market Price'}
-                value={`₹${econ.market_price_per_kg_inr?.min || 100}-${econ.market_price_per_kg_inr?.max || 150}/kg`}
-              />
-              <ParamRow
-                theme={theme}
-                styles={styles}
-                icon="time-outline"
-                label={t('species.culturePeriod') || 'Culture Period'}
-                value={`${d.culture_period_months?.min || 8}-${d.culture_period_months?.max || 10} months`}
-              />
-            </>
-          )}
-        </View>
-      </View>
-
-      {d.optimal_systems && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Optimal Systems</Text>
-          <View style={styles.systemsRow}>
-            {d.optimal_systems.map((s: string, idx: number) => (
-              <View key={idx} style={styles.systemBadge}>
-                <Text style={styles.systemBadgeText}>{s.replace(/_/g, ' ')}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
-      )}
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -204,6 +220,19 @@ function ParamRow({ icon, label, value, theme, styles }: { icon: any; label: str
 }
 
 const getStyles = (theme: any) => StyleSheet.create({
+  safeContainer: { flex: 1, backgroundColor: theme.colors.surface },
+  navBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: theme.colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  navBackBtn: { padding: 4 },
+  navTitle: { flex: 1, fontSize: 17, fontWeight: '600', color: theme.colors.textPrimary, textAlign: 'center' },
   container: { flex: 1, backgroundColor: theme.colors.background },
   header: { alignItems: 'center', padding: 32, backgroundColor: theme.colors.surface },
   iconWrap: {

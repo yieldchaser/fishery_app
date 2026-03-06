@@ -27,6 +27,7 @@ import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { useTheme } from '../ThemeContext';
 import { geoService } from '../services/apiService';
+import { useNavigation } from '@react-navigation/native';
 
 const WATER_SOURCES = [
   { label: 'Borewell', value: 'BOREWELL' },
@@ -107,6 +108,7 @@ export default function MapScreen() {
   const { theme, isDark } = useTheme();
   const styles = getStyles(theme, isDark);
   const { t } = useTranslation();
+  const navigation = useNavigation<any>();
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [address, setAddress] = useState<string | null>(null);
   const [suitabilityData, setSuitabilityData] = useState<any | null>(null);
@@ -335,9 +337,17 @@ export default function MapScreen() {
   const selectedStateName = statesList.find(s => s.value === stateCode)?.label || stateCode || 'Select State';
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView ref={scrollViewRef} contentContainerStyle={styles.scrollContent}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.surface }]} edges={['top']}>
+      <ScrollView ref={scrollViewRef} contentContainerStyle={[styles.scrollContent, { backgroundColor: theme.colors.background }]}>
         <View style={styles.header}>
+          <TouchableOpacity
+            onPress={() => (navigation as any).navigate('Main', { screen: 'Home' })}
+            hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+            style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}
+          >
+            <Ionicons name="arrow-back" size={24} color={theme.colors.primary} />
+            <Text style={{ marginLeft: 8, fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>Home</Text>
+          </TouchableOpacity>
           <Text style={styles.title}>{t('maps.title') || 'Geo Suitability'}</Text>
           <Text style={styles.subtitle}>{t('maps.subtitle') || 'Analyze your pond environment'}</Text>
         </View>

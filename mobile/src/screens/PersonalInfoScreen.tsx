@@ -9,6 +9,7 @@ import {
     View, Text, StyleSheet, ScrollView, TextInput,
     TouchableOpacity, ActivityIndicator, Alert, Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -128,7 +129,7 @@ export default function PersonalInfoScreen({ navigation }: Props) {
             await saveProfile({ userId, name: name.trim(), phone: phone.trim(), farmerCategory, stateCode });
             setDirty(false);
             Alert.alert('✓ Saved', 'Your profile has been updated.', [
-                { text: 'OK', onPress: () => navigation.goBack() },
+                { text: 'OK', onPress: () => (navigation as any).navigate('Main') },
             ]);
         } catch (e) {
             Alert.alert('Error', 'Could not save profile. Please try again.');
@@ -148,109 +149,131 @@ export default function PersonalInfoScreen({ navigation }: Props) {
     const selectedStateName = STATES.find(s => s.value === stateCode)?.label || 'Select State';
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
-            {/* Header */}
-            <View style={styles.hero}>
-                <View style={styles.avatar}>
-                    <Ionicons name="person" size={40} color={theme.colors.textInverse} />
-                </View>
-                <Text style={styles.heroTitle}>{name || 'Your Name'}</Text>
-                <Text style={styles.heroSub}>{phone || '+91 —'}</Text>
+        <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.primary }} edges={['top']}>
+            {/* Nav Header */}
+            <View style={{
+                flexDirection: 'row', alignItems: 'center',
+                paddingHorizontal: 16, paddingVertical: 12,
+                backgroundColor: theme.colors.primary
+            }}>
+                <TouchableOpacity
+                    onPress={() => (navigation as any).navigate('Main', { screen: 'Home' })}
+                    hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+                    style={{ flexDirection: 'row', alignItems: 'center' }}
+                >
+                    <Ionicons name="arrow-back" size={24} color={theme.colors.textInverse} />
+                    <Text style={{ marginLeft: 8, fontSize: 16, color: theme.colors.textInverse, fontWeight: '600' }}>Home</Text>
+                </TouchableOpacity>
+                <Text style={{
+                    marginLeft: 12, fontSize: 18, fontWeight: '700',
+                    color: theme.colors.textInverse
+                }}>Edit Profile</Text>
             </View>
 
-            {/* Form Card */}
-            <View style={styles.card}>
-                <Text style={styles.sectionTitle}>Edit Information</Text>
-
-                {/* Name */}
-                <View style={styles.fieldGroup}>
-                    <Text style={styles.label}>Full Name *</Text>
-                    <View style={[styles.inputRow, touchedName && !name.trim() && styles.inputError]}>
-                        <Ionicons name="person-outline" size={18} color={theme.colors.textMuted} style={styles.inputIcon} />
-                        <TextInput
-                            style={styles.input}
-                            placeholder="e.g. Ramesh Kumar"
-                            placeholderTextColor={theme.colors.textMuted}
-                            value={name}
-                            onChangeText={v => { setName(v); markDirty(); setTouchedName(true); }}
-                            returnKeyType="next"
-                        />
+            <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
+                {/* Header */}
+                <View style={styles.hero}>
+                    <View style={styles.avatar}>
+                        <Ionicons name="person" size={40} color={theme.colors.textInverse} />
                     </View>
-                    {touchedName && !name.trim() && (
-                        <Text style={styles.errorText}>Name cannot be empty</Text>
-                    )}
+                    <Text style={styles.heroTitle}>{name || 'Your Name'}</Text>
+                    <Text style={styles.heroSub}>{phone || '+91 —'}</Text>
                 </View>
 
-                {/* Phone */}
-                <View style={styles.fieldGroup}>
-                    <Text style={styles.label}>Phone Number</Text>
-                    <View style={styles.inputRow}>
-                        <Ionicons name="call-outline" size={18} color={theme.colors.textMuted} style={styles.inputIcon} />
-                        <TextInput
-                            style={styles.input}
-                            placeholder="e.g. 9876543210"
-                            placeholderTextColor={theme.colors.textMuted}
-                            value={phone}
-                            onChangeText={v => { setPhone(v); markDirty(); }}
-                            keyboardType="phone-pad"
-                            maxLength={10}
-                        />
+                {/* Form Card */}
+                <View style={styles.card}>
+                    <Text style={styles.sectionTitle}>Edit Information</Text>
+
+                    {/* Name */}
+                    <View style={styles.fieldGroup}>
+                        <Text style={styles.label}>Full Name *</Text>
+                        <View style={[styles.inputRow, touchedName && !name.trim() && styles.inputError]}>
+                            <Ionicons name="person-outline" size={18} color={theme.colors.textMuted} style={styles.inputIcon} />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="e.g. Ramesh Kumar"
+                                placeholderTextColor={theme.colors.textMuted}
+                                value={name}
+                                onChangeText={v => { setName(v); markDirty(); setTouchedName(true); }}
+                                returnKeyType="next"
+                            />
+                        </View>
+                        {touchedName && !name.trim() && (
+                            <Text style={styles.errorText}>Name cannot be empty</Text>
+                        )}
+                    </View>
+
+                    {/* Phone */}
+                    <View style={styles.fieldGroup}>
+                        <Text style={styles.label}>Phone Number</Text>
+                        <View style={styles.inputRow}>
+                            <Ionicons name="call-outline" size={18} color={theme.colors.textMuted} style={styles.inputIcon} />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="e.g. 9876543210"
+                                placeholderTextColor={theme.colors.textMuted}
+                                value={phone}
+                                onChangeText={v => { setPhone(v); markDirty(); }}
+                                keyboardType="phone-pad"
+                                maxLength={10}
+                            />
+                        </View>
+                    </View>
+
+                    {/* Farmer Category */}
+                    <View style={styles.fieldGroup}>
+                        <Text style={styles.label}>Farmer Category</Text>
+                        <View style={styles.chipRow}>
+                            {FARMER_CATEGORIES.map(cat => (
+                                <TouchableOpacity
+                                    key={cat.value}
+                                    style={[styles.chip, farmerCategory === cat.value && styles.chipActive]}
+                                    onPress={() => { setFarmerCategory(cat.value); markDirty(); }}
+                                >
+                                    <Text style={[styles.chipText, farmerCategory === cat.value && styles.chipTextActive]}>
+                                        {cat.label}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </View>
+
+                    {/* State */}
+                    <View style={styles.fieldGroup}>
+                        <Text style={styles.label}>Home State</Text>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.stateScroll}>
+                            {STATES.map(s => (
+                                <TouchableOpacity
+                                    key={s.value}
+                                    style={[styles.stateChip, stateCode === s.value && styles.chipActive]}
+                                    onPress={() => { setStateCode(s.value); markDirty(); }}
+                                >
+                                    <Text style={[styles.chipText, stateCode === s.value && styles.chipTextActive]}>
+                                        {s.label}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                        {stateCode ? (
+                            <Text style={styles.selectedState}>✓ {selectedStateName}</Text>
+                        ) : null}
                     </View>
                 </View>
 
-                {/* Farmer Category */}
-                <View style={styles.fieldGroup}>
-                    <Text style={styles.label}>Farmer Category</Text>
-                    <View style={styles.chipRow}>
-                        {FARMER_CATEGORIES.map(cat => (
-                            <TouchableOpacity
-                                key={cat.value}
-                                style={[styles.chip, farmerCategory === cat.value && styles.chipActive]}
-                                onPress={() => { setFarmerCategory(cat.value); markDirty(); }}
-                            >
-                                <Text style={[styles.chipText, farmerCategory === cat.value && styles.chipTextActive]}>
-                                    {cat.label}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                </View>
-
-                {/* State */}
-                <View style={styles.fieldGroup}>
-                    <Text style={styles.label}>Home State</Text>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.stateScroll}>
-                        {STATES.map(s => (
-                            <TouchableOpacity
-                                key={s.value}
-                                style={[styles.stateChip, stateCode === s.value && styles.chipActive]}
-                                onPress={() => { setStateCode(s.value); markDirty(); }}
-                            >
-                                <Text style={[styles.chipText, stateCode === s.value && styles.chipTextActive]}>
-                                    {s.label}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
-                    {stateCode ? (
-                        <Text style={styles.selectedState}>✓ {selectedStateName}</Text>
-                    ) : null}
-                </View>
-            </View>
-
-            {/* Save Button */}
-            <TouchableOpacity
-                style={[styles.saveBtn, !dirty && styles.saveBtnDisabled]}
-                onPress={handleSave}
-                disabled={saving || !dirty}
-                activeOpacity={0.85}
-            >
-                {saving
-                    ? <ActivityIndicator color={theme.colors.surface} />
-                    : <><Ionicons name="checkmark-circle-outline" size={20} color={theme.colors.surface} /><Text style={styles.saveBtnText}>Save Changes</Text></>
-                }
-            </TouchableOpacity>
-        </ScrollView>
+                {/* Save Button */}
+                <TouchableOpacity
+                    style={[styles.saveBtn, !dirty && styles.saveBtnDisabled]}
+                    onPress={handleSave}
+                    disabled={saving || !dirty}
+                    activeOpacity={0.85}
+                >
+                    {saving
+                        ? <ActivityIndicator color={theme.colors.surface} />
+                        : <><Ionicons name="checkmark-circle-outline" size={20} color={theme.colors.surface} /><Text style={styles.saveBtnText}>Save Changes</Text></>
+                    }
+                </TouchableOpacity>
+            </ScrollView>
+        </SafeAreaView>
     );
 }
 

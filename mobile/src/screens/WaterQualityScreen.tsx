@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { waterQualityService } from '../services/apiService';
 import { useTheme } from '../ThemeContext';
 
@@ -40,6 +42,7 @@ export default function WaterQualityScreen() {
   const { t } = useTranslation();
   const { theme } = useTheme();
   const styles = getStyles(theme);
+  const navigation = useNavigation<any>();
 
   const [activeTab, setActiveTab] = useState<'log' | 'history'>('log');
 
@@ -109,9 +112,20 @@ export default function WaterQualityScreen() {
   const onRefresh = () => { setRefreshing(true); loadHistory(); };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.surface }]} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.title}>{t('waterQuality.title') || 'Water Quality'}</Text>
+        <View style={styles.headerTop}>
+          <TouchableOpacity
+            onPress={() => (navigation as any).navigate('Main', { screen: 'Home' })}
+            hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+            style={{ flexDirection: 'row', alignItems: 'center' }}
+          >
+            <Ionicons name="arrow-back" size={24} color={theme.colors.textPrimary} />
+            <Text style={{ marginLeft: 8, fontSize: 16, color: theme.colors.textPrimary, fontWeight: '600' }}>Home</Text>
+          </TouchableOpacity>
+          <Text style={styles.title}>{t('waterQuality.title') || 'Water Quality'}</Text>
+          <View style={{ width: 24 }} />
+        </View>
         <View style={styles.tabContainer}>
           <TouchableOpacity
             style={[styles.tab, activeTab === 'log' && styles.tabActive]}
@@ -221,7 +235,7 @@ export default function WaterQualityScreen() {
           )}
         </ScrollView>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -257,9 +271,17 @@ function ParamChip({ label, value, styles }: { label: string; value: string; sty
 
 const getStyles = (theme: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
-  header: { padding: 16, backgroundColor: theme.colors.surface },
-  title: { fontSize: 24, fontWeight: 'bold', color: theme.colors.textPrimary },
-  tabContainer: { flexDirection: 'row', marginTop: 16, backgroundColor: theme.isDark ? '#333' : '#f0f0f0', borderRadius: 8, padding: 4 },
+  header: { backgroundColor: theme.colors.surface, paddingBottom: 0 },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 12,
+  },
+  title: { fontSize: 22, fontWeight: 'bold', color: theme.colors.textPrimary },
+  tabContainer: { flexDirection: 'row', marginHorizontal: 16, marginBottom: 12, backgroundColor: theme.isDark ? '#333' : '#f0f0f0', borderRadius: 8, padding: 4 },
   tab: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 6 },
   tabActive: { backgroundColor: theme.colors.surface },
   tabText: { color: theme.colors.textSecondary, fontWeight: '500' },

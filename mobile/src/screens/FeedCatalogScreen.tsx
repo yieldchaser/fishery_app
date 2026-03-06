@@ -73,15 +73,13 @@ export default function FeedCatalogScreen() {
 
             <Text style={styles.suitableText}>Suitable for: {item.suitable_for}</Text>
 
-            {item.shop_url && (
-                <TouchableOpacity
-                    style={styles.shopButton}
-                    onPress={() => Linking.openURL(item.shop_url)}
-                >
-                    <Ionicons name="cart-outline" size={18} color={theme.colors.textInverse} />
-                    <Text style={styles.shopButtonText}>Shop Now</Text>
-                </TouchableOpacity>
-            )}
+            <TouchableOpacity
+                style={[styles.shopButton, !item.shop_url && { backgroundColor: '#e28743' }]}
+                onPress={() => Linking.openURL(item.shop_url || `https://dir.indiamart.com/search.mp?ss=${encodeURIComponent(`${item.brand} ${item.name}`)}`)}
+            >
+                <Ionicons name="cart-outline" size={18} color={theme.colors.textInverse} />
+                <Text style={styles.shopButtonText}>{item.shop_url ? 'Shop Now' : 'Search Suppliers'}</Text>
+            </TouchableOpacity>
         </View>
     );
 
@@ -94,10 +92,11 @@ export default function FeedCatalogScreen() {
     }
 
     return (
-        <SafeAreaView style={styles.container} edges={['top']}>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.surface }]} edges={['top']}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+                <TouchableOpacity onPress={() => (navigation as any).navigate('Main', { screen: 'Home' })} style={[styles.backBtn, { flexDirection: 'row', alignItems: 'center' }]}>
                     <Ionicons name="arrow-back" size={24} color={theme.colors.textPrimary} />
+                    <Text style={{ marginLeft: 8, fontSize: 16, color: theme.colors.textPrimary, fontWeight: '600' }}>Home</Text>
                 </TouchableOpacity>
                 <Text style={styles.title}>Feed & Nutrition</Text>
             </View>

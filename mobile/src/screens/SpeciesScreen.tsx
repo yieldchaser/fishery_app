@@ -41,7 +41,6 @@ const SpeciesCard = ({ species, onPress, theme, styles }: { species: any; onPres
                 width: '100%',
                 height: '100%',
                 backgroundColor: theme.isDark ? '#1a1a1a' : '#f0f0f0',
-                transform: enName === 'Rohu' ? [{ scaleY: -1 }] : []
               }}
               resizeMode="contain"
             />
@@ -129,10 +128,22 @@ export default function SpeciesScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.surface }]} edges={['top']}>
       <View style={styles.header}>
-        <Text style={styles.title}>{t('species.title') || 'Species Intelligence'}</Text>
-        <Text style={styles.subtitle}>{t('species.subtitle') || 'Aquaculture knowledge base'}</Text>
+        <View style={styles.headerTop}>
+          <TouchableOpacity
+            onPress={() => (navigation as any).navigate('Main', { screen: 'Home' })}
+            hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
+            style={{ flexDirection: 'row', alignItems: 'center' }}
+          >
+            <Ionicons name="arrow-back" size={24} color={theme.colors.primary} />
+            <Text style={{ marginLeft: 8, fontSize: 16, color: theme.colors.primary, fontWeight: '600' }}>Home</Text>
+          </TouchableOpacity>
+          <View style={{ flex: 1, marginLeft: 12 }}>
+            <Text style={styles.title}>{t('species.title') || 'Species Intelligence'}</Text>
+            <Text style={styles.subtitle}>{t('species.subtitle') || 'Aquaculture knowledge base'}</Text>
+          </View>
+        </View>
         <View style={styles.searchBar}>
           <Ionicons name="search-outline" size={18} color={theme.colors.textMuted} />
           <TextInput
@@ -177,8 +188,9 @@ export default function SpeciesScreen() {
 const getStyles = (theme: any) => StyleSheet.create({
   container: { flex: 1, backgroundColor: theme.colors.background },
   header: { padding: 16, backgroundColor: theme.colors.surface, paddingBottom: 8 },
-  title: { fontSize: 26, fontWeight: 'bold', color: theme.colors.primary },
-  subtitle: { fontSize: 16, color: theme.colors.textSecondary, marginTop: 4 },
+  headerTop: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
+  title: { fontSize: 22, fontWeight: 'bold', color: theme.colors.primary },
+  subtitle: { fontSize: 14, color: theme.colors.textSecondary, marginTop: 2 },
   searchBar: {
     flexDirection: 'row', alignItems: 'center',
     backgroundColor: theme.colors.background, borderRadius: 10, paddingHorizontal: 12,
@@ -193,10 +205,11 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   cardHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   iconWrap: {
-    width: 110, height: 75, borderRadius: 12,
-    backgroundColor: theme.colors.success,
+    width: 90, height: 90, borderRadius: 12,
+    backgroundColor: theme.isDark ? '#1e293b' : '#f1f5f9',
     justifyContent: 'center', alignItems: 'center',
     overflow: 'hidden',
+    borderWidth: 1, borderColor: theme.colors.border
   },
   speciesName: { fontSize: 18, fontWeight: '600', color: theme.colors.textPrimary },
   scientificName: { fontSize: 15, fontStyle: 'italic', color: theme.colors.textSecondary, marginTop: 2 },

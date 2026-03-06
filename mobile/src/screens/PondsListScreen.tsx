@@ -53,14 +53,15 @@ const PondsList = ({ ponds }: { ponds: Pond[] }) => {
     );
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.surface }]} edges={['top']}>
             <View style={styles.header}>
                 <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => navigation.goBack()}
+                    style={[styles.backButton, { flexDirection: 'row', alignItems: 'center' }]}
+                    onPress={() => (navigation as any).navigate('Main', { screen: 'Home' })}
                     hitSlop={{ top: 15, bottom: 15, left: 15, right: 15 }}
                 >
                     <Ionicons name="arrow-back" size={24} color={theme.colors.textPrimary} />
+                    <Text style={{ marginLeft: 8, fontSize: 16, color: theme.colors.textPrimary, fontWeight: '600' }}>Home</Text>
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>My Ponds</Text>
                 <TouchableOpacity

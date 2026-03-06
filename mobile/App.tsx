@@ -196,13 +196,13 @@ function MainApp() {
           }}
         >
           <Stack.Screen name="Main" component={MainTabs} options={{ headerShown: false }} />
-          <Stack.Screen name="SpeciesDetail" component={SpeciesDetailScreen} options={{ title: 'Species Details' }} />
-          <Stack.Screen name="EconomicsResult" component={EconomicsResultScreen} options={{ title: 'Simulation Results' }} />
-          <Stack.Screen name="WaterQuality" component={WaterQualityScreen} options={{ title: 'Water Quality Log' }} />
-          <Stack.Screen name="MarketPrices" component={MarketPricesScreen} options={{ title: 'Market Prices' }} />
-          <Stack.Screen name="EquipmentCatalog" component={EquipmentCatalogScreen} options={{ title: 'Equipment Catalog' }} />
-          <Stack.Screen name="FeedCatalog" component={FeedCatalogScreen} options={{ title: 'Feed & Nutrition' }} />
-          <Stack.Screen name="PersonalInfo" component={PersonalInfoScreen} options={{ title: 'Personal Information' }} />
+          <Stack.Screen name="SpeciesDetail" component={SpeciesDetailScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="EconomicsResult" component={EconomicsResultScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="WaterQuality" component={WaterQualityScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="MarketPrices" component={MarketPricesScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="EquipmentCatalog" component={EquipmentCatalogScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="FeedCatalog" component={FeedCatalogScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="PersonalInfo" component={PersonalInfoScreen} options={{ headerShown: false }} />
           <Stack.Screen name="PondsList" component={PondsListScreen} options={{ headerShown: false }} />
           <Stack.Screen name="AddEditPond" component={AddEditPondScreen} options={{ headerShown: false, presentation: 'modal' }} />
         </Stack.Navigator>
