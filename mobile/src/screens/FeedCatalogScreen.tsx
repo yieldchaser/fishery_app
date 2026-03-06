@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     View, Text, StyleSheet, FlatList, TouchableOpacity,
-    ActivityIndicator, RefreshControl, ScrollView
+    ActivityIndicator, RefreshControl, ScrollView, Linking
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
@@ -72,6 +72,16 @@ export default function FeedCatalogScreen() {
             </View>
 
             <Text style={styles.suitableText}>Suitable for: {item.suitable_for}</Text>
+
+            {item.shop_url && (
+                <TouchableOpacity
+                    style={styles.shopButton}
+                    onPress={() => Linking.openURL(item.shop_url)}
+                >
+                    <Ionicons name="cart-outline" size={18} color={theme.colors.textInverse} />
+                    <Text style={styles.shopButtonText}>Shop Now</Text>
+                </TouchableOpacity>
+            )}
         </View>
     );
 
@@ -147,5 +157,20 @@ const getStyles = (theme: any) => StyleSheet.create({
     suitableText: { fontSize: 12, color: theme.colors.textSecondary, fontStyle: 'italic', marginTop: 4 },
     center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
     empty: { padding: 40, alignItems: 'center' },
-    emptyText: { marginTop: 12, color: theme.colors.textMuted, textAlign: 'center' }
+    emptyText: { marginTop: 12, color: theme.colors.textMuted, textAlign: 'center' },
+    shopButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: theme.colors.primary,
+        paddingVertical: 10,
+        borderRadius: 8,
+        marginTop: 16,
+        gap: 6
+    },
+    shopButtonText: {
+        color: theme.colors.textInverse,
+        fontWeight: 'bold',
+        fontSize: 14
+    }
 });
