@@ -289,16 +289,16 @@ const getStyles = (theme: any) => StyleSheet.create({
   speciesName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: theme.colors.textPrimary
+    color: theme.colors.textPrimary,
+    flex: 1,
+    marginRight: 8
   },
   compatibilityBadge: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: theme.colors.success,
-    backgroundColor: theme.isDark ? '#1a3a1f' : '#E8F5E9',
     paddingHorizontal: 8,
     paddingVertical: 2,
-    borderRadius: 4
+    borderRadius: 4,
+    flexShrink: 0,
+    alignItems: 'center'
   },
   scientificName: {
     fontSize: 13,
